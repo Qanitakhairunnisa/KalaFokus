@@ -8,7 +8,7 @@
     <div
       class="relative z-10 w-full max-w-4xl bg-softwhite rounded-[28px] sm:rounded-[36px] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
       <div class="hidden lg:block relative bg-mocha-800">
-        <img :src="illustrationSrc" @error="onImageError" alt="Ilustrasi KalaFokus"
+        <img src="./download (36).jpg'" @error="onImageError" alt="Ilustrasi KalaFokus"
           class="w-full h-full object-cover" />
       </div>
 
@@ -98,7 +98,6 @@
 import { ref, reactive } from 'vue';
 import { useKalaFokus } from '../composables/useKalaFokus';
 import BaseIcon from '../components/ui/BaseIcon.vue';
-import fallbackHero from '../assets/hero.png';
 
 const { state, login, register, navigate } = useKalaFokus();
 
@@ -106,11 +105,6 @@ const isRegister = ref(false);
 const loginEmail = ref('nadia@kalafokus.id');
 const loginPassword = ref('kalafokus2026');
 
-// Gunakan gambar dari New folder jika sudah dipindah ke public/assets, atau fallback ke hero.png
-const illustrationSrc = ref('../assets/images/download (36).jpg');
-function onImageError() {
-  illustrationSrc.value = fallbackHero;
-}
 
 const regForm = reactive({
   name: '',
