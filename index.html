@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2F6AAE" />
+  <meta name="description"
+    content="KalaFokus — Aplikasi produktivitas Single Page Application (SPA) berbasis psikologi kognitif untuk mengelola rentang fokus dan mencegah burnout." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="KalaFokus" />
+  <title>KalaFokus — Ruang Produktivitas Kognitif & Anti-Burnout</title>
+
+  <!-- Progressive Web App Manifest & Icons -->
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="./assets/icons/icon-192.svg" />
+  <link rel="apple-touch-icon" href="./assets/icons/icon-192.svg" />
+
+  <!-- Tipografi Editorial: Lora (Serif) & Plus Jakarta Sans (Sans-Serif) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN dengan Konfigurasi Palet Editorial (Soft White, Warm Cream, Mocha) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            softwhite: '#FFFFFF',
+            warmcream: { 50: '#F7FAFE', 100: '#E8F1FB', 200: '#D6E6F8', 300: '#BFD6F0' },
+            mocha: { 50: '#F2F7FD', 100: '#DCE8F6', 300: '#9DB6D3', 500: '#6584A8', 600: '#4A6A8F', 700: '#35557D', 800: '#2F6AAE', 900: '#1B3556' },
+            sage: { 50: '#EEF6FD', 100: '#D6E8F8', 600: '#4F9BD9', 700: '#2F76B8' },
+            terracotta: { 50: '#FFF1F2', 100: '#FFE0E3', 500: '#E5707E', 600: '#D4505F', 700: '#B23A49' }
+          },
+          fontFamily: {
+            serif: ['Lora', 'Georgia', 'serif'],
+            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Custom Editorial Stylesheet -->
+  <link rel="stylesheet" href="./assets/css/custom.css" />
+  <style>
+/* Ikon SVG (menggantikan emoji): ukuran kecil, warna mengikuti teks (biru/putih) */
+.ic { display: inline-block; width: 1em; height: 1em; flex: none; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ic-m { margin-right: .4em; }
+.nav-btn .ic { width: 16px; height: 16px; }
+.dash-stat__icon { color: #2F6AAE; }
+.dash-stat__icon .ic { width: 20px; height: 20px; vertical-align: middle; }
+.focus-ctl { display: inline-grid; place-items: center; }
+.focus-ctl .ic { width: 16px; height: 16px; vertical-align: middle; }
+.focus-ring__idea { display: inline-flex; align-items: center; gap: 4px; }
+.focus-ring__idea .ic { width: 12px; height: 12px; margin: 0; vertical-align: middle; }
+.task-card__edit { padding: 4px 8px; border: 0; border-radius: 8px; background: transparent; font-size: 14px; color: #2F6AAE; cursor: pointer; opacity: .65; }
+.task-card__edit:hover { background: #E8F1FB; opacity: 1; }
+.task-card__edit:focus-visible { outline: 2px solid var(--d-blue); outline-offset: 2px; }
+.task-card__edit .ic, .task-card__del .ic { width: 15px; height: 15px; vertical-align: middle; }
+.task-card.is-editing { border-color: var(--d-blue); box-shadow: 0 0 0 3px rgba(74, 144, 217, .18); }
+.task-form.is-editing { border-color: var(--d-blue); box-shadow: 0 0 0 3px rgba(74, 144, 217, .15); }
+.task-form__cancel { width: 100%; }
+/* Badge tidak boleh terpecah ke banyak baris; tabel digulir horizontal di layar sempit */
+.dash-table td:not(.dash-cell-title), .dash-table td span, .task-card__side span { white-space: nowrap; }
+.dash-table { min-width: 460px; }
+.task-card__side { flex-wrap: wrap; }
+  </style>
+</head>
+
+<body class="bg-softwhite text-mocha-900 min-h-screen selection:bg-warmcream-200 selection:text-mocha-900">
+
+  <!-- Sprite ikon SVG (menggantikan emoji) -->
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></symbol>
+    <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-smartphone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></symbol>
+    <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></symbol>
+    <symbol id="i-layout-dashboard" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></symbol>
+    <symbol id="i-clipboard-list" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></symbol>
+    <symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></symbol>
+    <symbol id="i-message-circle" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+    <symbol id="i-wind" viewBox="0 0 24 24"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></symbol>
+    <symbol id="i-lightbulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-cloud-rain" viewBox="0 0 24 24"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/></symbol>
+    <symbol id="i-cloud-fog" viewBox="0 0 24 24"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 17H7"/><path d="M17 21H9"/></symbol>
+    <symbol id="i-battery-low" viewBox="0 0 24 24"><rect width="16" height="10" x="2" y="7" rx="2" ry="2"/><line x1="22" x2="22" y1="11" y2="13"/><line x1="6" x2="6" y1="11" y2="13"/></symbol>
+    <symbol id="i-siren" viewBox="0 0 24 24"><path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"/><path d="M21 12h1"/><path d="M18.5 4.5 18 5"/><path d="M2 12h1"/><path d="M12 2v1"/><path d="m4.929 4.929.707.707"/><path d="M12 12v6"/></symbol>
+    <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/><rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/></symbol>
+    <symbol id="i-rotate-ccw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-loader" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></symbol>
+    <symbol id="i-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/></symbol>
+  </svg>
+
+  <!-- ========================================================================
+       NOTIFIKASI INSTALASI PROGRESSIVE WEB APP (ADD TO HOME SCREEN)
+       ======================================================================== -->
+  <div id="pwa-install-banner"
+    class="hidden fixed bottom-20 lg:bottom-6 right-4 left-4 lg:left-auto lg:w-[420px] z-50 bg-mocha-800 text-softwhite rounded-2xl p-4 shadow-2xl border border-mocha-600/40 transition-all duration-300">
+    <div class="flex items-start gap-3.5">
+      <div
+        class="w-11 h-11 rounded-xl bg-warmcream-100/15 flex items-center justify-center shrink-0 border border-warmcream-200/20">
+        <svg class="w-6 h-6 text-warmcream-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-[11px] uppercase tracking-widest text-warmcream-200 font-semibold">Progressive Web
+            App</span>
+          <button id="btn-dismiss-pwa" class="text-warmcream-200/70 hover:text-white text-xs"
+            title="Tutup sementara"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-x"></use></svg></button>
+        </div>
+        <h4 class="font-serif font-semibold text-sm text-softwhite mt-0.5">Pasang KalaFokus di Layar Utama</h4>
+        <p class="text-xs text-warmcream-200/85 mt-1 leading-relaxed">
+          Akses ruang fokus bebas distraksi secara instan.
+        </p>
+        <div class="mt-3 flex items-center gap-2">
+          <button id="btn-install-pwa"
+            class="px-3.5 py-1.5 rounded-lg bg-warmcream-100 text-mocha-900 font-semibold text-xs hover:bg-white transition">
+            + Tambahkan ke Layar Utama
+          </button>
+          <button id="btn-later-pwa"
+            class="px-3 py-1.5 rounded-lg border border-warmcream-200/25 text-warmcream-200 text-xs hover:bg-mocha-700 transition">
+            Nanti
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       TOAST NOTIFICATION CONTAINER (NON-INTRUSIVE FEEDBACK)
+       ======================================================================== -->
+  <div id="toast-container"
+    class="fixed top-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- ========================================================================
+       GERBANG LAYAR AUTENTIKASI KHUSUS (BCRYPT SECURITY GATE)
+       ======================================================================== -->
+  <section id="auth-gate"
+    class="min-h-screen flex items-center justify-center p-5 sm:p-10 relative overflow-hidden bg-gradient-to-br from-mocha-700 via-mocha-800 to-mocha-900">
+
+    <!-- Dekorasi lingkaran mengambang -->
+    <span class="pointer-events-none absolute -top-8 -left-8 w-24 h-24 rounded-full border-2 border-white/25"></span>
+    <span class="pointer-events-none absolute top-10 left-16 w-2.5 h-2.5 rounded-full bg-white/50"></span>
+    <span class="pointer-events-none absolute top-24 left-28 w-1.5 h-1.5 rounded-full bg-white/40"></span>
+    <span class="pointer-events-none absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-white/10"></span>
+    <span class="pointer-events-none absolute bottom-16 right-24 w-2 h-2 rounded-full bg-white/50"></span>
+    <span class="pointer-events-none absolute bottom-28 right-12 w-1.5 h-1.5 rounded-full bg-white/40"></span>
+
+    <!-- Kartu Autentikasi -->
+    <div
+      class="relative z-10 w-full max-w-4xl bg-softwhite rounded-[28px] sm:rounded-[36px] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
+
+      <!-- Kolom Kiri: Ilustrasi -->
+      <div class="hidden lg:block relative">
+        <img src="./assets/images/download (36).jpg" alt="Ilustrasi"
+          class="w-full h-full object-cover" />
+      </div>
+
+      <!-- Kolom Kanan: Form -->
+      <div class="p-8 sm:p-10 lg:p-12 flex flex-col justify-center">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h2 id="auth-heading" class="font-serif text-2xl sm:text-[26px] font-bold text-mocha-900">Masuk ke Akun Anda</h2>
+            <p id="auth-subtitle" class="text-xs sm:text-sm text-mocha-600 mt-1.5 leading-relaxed">
+              Kelola fokus tanpa batas. Gratis selamanya.
+            </p>
+          </div>
+          <button id="btn-install-pwa-auth"
+            class="hidden shrink-0 px-2.5 py-1.5 rounded-lg bg-warmcream-100 hover:bg-warmcream-200 text-mocha-800 text-[11px] font-medium border border-warmcream-300 transition"
+            title="Pasang PWA">
+            <svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-smartphone"></use></svg>
+          </button>
+        </div>
+
+        <!-- FORM LOGIN -->
+        <form id="form-login" class="space-y-4 mt-7">
+          <div class="relative">
+            <svg class="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-mocha-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.25 6.75l9.75 6.5 9.75-6.5M3 18h18a1.5 1.5 0 001.5-1.5V7.5A1.5 1.5 0 0021 6H3a1.5 1.5 0 00-1.5 1.5v9A1.5 1.5 0 003 18z" />
+            </svg>
+            <input id="login-email" type="email" required value="nadia@kalafokus.id"
+              class="w-full pl-7 pr-1 py-2.5 border-b border-warmcream-300 bg-transparent text-sm text-mocha-900 focus:outline-none focus:border-mocha-700 transition"
+              placeholder="Email" />
+          </div>
+          <div class="relative">
+            <svg class="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-mocha-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16.5 10.5V7.5a4.5 4.5 0 10-9 0v3m-1.5 0h12a1.5 1.5 0 011.5 1.5v7.5a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 19.5V12a1.5 1.5 0 011.5-1.5z" />
+            </svg>
+            <input id="login-password" type="password" required value="kalafokus2026"
+              class="w-full pl-7 pr-1 py-2.5 border-b border-warmcream-300 bg-transparent text-sm text-mocha-900 focus:outline-none focus:border-mocha-700 transition"
+              placeholder="Password" />
+          </div>
+          <div id="bcrypt-preview-box" class="hidden font-mono text-[10px] text-mocha-400 truncate"></div>
+
+          <div class="pt-2 flex items-center justify-center">
+            <button type="submit"
+              class="px-7 py-2.5 rounded-full bg-mocha-800 hover:bg-mocha-900 text-softwhite font-semibold text-sm shadow-sm transition flex items-center gap-2">
+              <span>Masuk</span>
+              <span><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow-right"></use></svg></span>
+            </button>
+          </div>
+        </form>
+
+        <!-- FORM REGISTRASI (TERSEMBUNYI SECARA DEFAULT) -->
+        <form id="form-register" class="space-y-4 mt-7 hidden">
+          <div class="relative">
+            <svg class="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-mocha-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 0115 0" />
+            </svg>
+            <input id="reg-name" type="text" required
+              class="w-full pl-7 pr-1 py-2.5 border-b border-warmcream-300 bg-transparent text-sm text-mocha-900 focus:outline-none focus:border-mocha-700 transition"
+              placeholder="Nama atau nickname" />
+          </div>
+          <div class="relative">
+            <svg class="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-mocha-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.25 6.75l9.75 6.5 9.75-6.5M3 18h18a1.5 1.5 0 001.5-1.5V7.5A1.5 1.5 0 0021 6H3a1.5 1.5 0 00-1.5 1.5v9A1.5 1.5 0 003 18z" />
+            </svg>
+            <input id="reg-email" type="email" required
+              class="w-full pl-7 pr-1 py-2.5 border-b border-warmcream-300 bg-transparent text-sm text-mocha-900 focus:outline-none focus:border-mocha-700 transition"
+              placeholder="Email" />
+          </div>
+          <div class="relative">
+            <svg class="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-mocha-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16.5 10.5V7.5a4.5 4.5 0 10-9 0v3m-1.5 0h12a1.5 1.5 0 011.5 1.5v7.5a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014.5 19.5V12a1.5 1.5 0 011.5-1.5z" />
+            </svg>
+            <input id="reg-password" type="password" minlength="8" required
+              class="w-full pl-7 pr-1 py-2.5 border-b border-warmcream-300 bg-transparent text-sm text-mocha-900 focus:outline-none focus:border-mocha-700 transition"
+              placeholder="Password (min. 8 karakter)" />
+          </div>
+          <div class="grid grid-cols-2 gap-4 pt-1">
+            <div>
+              <label class="block text-[11px] font-semibold text-mocha-500 mb-1">Profil Kognitif</label>
+              <select id="reg-profile"
+                class="w-full py-1.5 border-b border-warmcream-300 bg-transparent text-xs text-mocha-900 focus:outline-none">
+                <option value="deep_thinker">Deep Thinker (50m)</option>
+                <option value="balanced_explorer" selected>Balanced (25m)</option>
+                <option value="sprint_worker">Sprint Worker (15m)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-mocha-500 mb-1">Batas Reels/Hari</label>
+              <input id="reg-reels-limit" type="number" min="10" max="120" value="30"
+                class="w-full py-1.5 border-b border-warmcream-300 bg-transparent text-xs text-mocha-900 focus:outline-none" />
+            </div>
+          </div>
+
+          <div class="pt-2 flex items-center justify-center">
+            <button type="submit"
+              class="px-7 py-2.5 rounded-full bg-mocha-800 hover:bg-mocha-900 text-softwhite font-semibold text-sm shadow-sm transition flex items-center gap-2">
+              <span>Daftar</span>
+              <span><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-arrow-right"></use></svg></span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Toggle Login / Registrasi -->
+        <p class="text-center text-xs text-mocha-600 mt-6">
+          <span id="auth-toggle-login-wrap">Belum punya akun?
+            <button id="tab-auth-register" type="button" class="text-mocha-800 font-semibold hover:underline">Daftar</button>
+          </span>
+          <span id="auth-toggle-register-wrap" class="hidden">Sudah punya akun?
+            <button id="tab-auth-login" type="button" class="text-mocha-800 font-semibold hover:underline">Masuk</button>
+          </span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       APLIKASI UTAMA SPA KALAFOKUS (TERSEMBUNYI SEBELUM LOGIN)
+       ======================================================================== -->
+  <div id="app-shell" class="hidden min-h-screen flex flex-col lg:flex-row bg-softwhite">
+
+    <!-- SIDEBAR NAVIGASI DESKTOP (DISTRACTION-FREE EDITORIAL SIDEBAR) -->
+    <aside
+      class="distraction-hide lg:w-72 bg-softwhite border-b lg:border-b-0 lg:border-r border-warmcream-300/80 flex flex-col justify-between shrink-0 lg:sticky lg:top-0 lg:h-screen z-30">
+      <div>
+        <!-- Brand Header -->
+        <div class="p-6 border-b border-warmcream-300/70 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-9 h-9 rounded-xl bg-mocha-800 text-softwhite flex items-center justify-center font-serif font-semibold text-lg shadow-sm">
+              K
+            </div>
+            <div>
+              <h1 class="font-serif font-semibold text-lg text-mocha-900 leading-none">KalaFokus</h1>
+              <span class="text-[11px] text-mocha-500 block mt-1">Cognitive Sanctuary</span>
+            </div>
+          </div>
+          <!-- Tombol PWA di Header Sidebar -->
+          <button id="btn-sidebar-pwa"
+            class="px-2.5 py-1 rounded-lg bg-softwhite border border-warmcream-300 text-[11px] font-medium text-mocha-700 hover:bg-warmcream-200 transition"
+            title="Pasang Aplikasi ke Perangkat">
+            <svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-smartphone"></use></svg>PWA
+          </button>
+        </div>
+
+        <!-- Kartu Status Kognitif Pengguna -->
+        <div class="px-5 py-4 border-b border-warmcream-300/60 bg-softwhite/50">
+          <div class="flex items-center justify-between">
+            <div>
+              <p id="user-display-name" class="text-xs font-semibold text-mocha-900">Nadia Pramesti</p>
+              <p id="user-display-profile" class="text-[11px] text-mocha-500">Profil: Deep Thinker</p>
+            </div>
+            <!-- Tombol keluar khusus mobile (di desktop ada di bagian bawah sidebar) -->
+            <button id="btn-logout-mobile" type="button"
+              class="lg:hidden px-3 py-1.5 rounded-lg border border-terracotta-500/40 bg-terracotta-50 text-terracotta-700 text-[11px] font-semibold flex items-center">
+              <svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-log-out"></use></svg>Keluar
+            </button>
+          </div>
+          <!-- Mini Indikator Kapasitas Fokus & BrainFall -->
+          <div class="mt-3 space-y-2">
+            <div>
+              <div class="flex justify-between text-[11px] text-mocha-600 mb-0.5">
+                <span>Fokus Hari Ini</span>
+                <span id="sidebar-focus-stat" class="font-semibold text-mocha-800">0 / 120 mnt</span>
+              </div>
+              <div class="w-full h-1.5 rounded-full bg-warmcream-200 overflow-hidden">
+                <div id="sidebar-focus-bar" class="h-full bg-sage-600 rounded-full transition-all duration-500"
+                  style="width: 45%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-[11px] text-mocha-600 mb-0.5">
+                <span>Paparan Reels (BrainFall)</span>
+                <span id="sidebar-brainfall-stat" class="font-semibold text-mocha-800">0 / 30 mnt</span>
+              </div>
+              <div class="w-full h-1.5 rounded-full bg-warmcream-200 overflow-hidden">
+                <div id="sidebar-brainfall-bar" class="h-full bg-mocha-600 rounded-full transition-all duration-500"
+                  style="width: 30%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Menu Navigasi Multi-Halaman SPA -->
+        <nav class="relative p-4 space-y-1 hidden lg:block" aria-label="Navigasi Utama">
+          <button data-route="dashboard"
+            class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition">
+            <span class="flex items-center gap-3">
+              <span class="text-base"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-layout-dashboard"></use></svg></span>
+              <span>Dashboard</span>
+            </span>
+          </button>
+
+          <button data-route="tasks"
+            class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition">
+            <span class="flex items-center gap-3">
+              <span class="text-base"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-clipboard-list"></use></svg></span>
+              <span>Manajemen Tugas</span>
+            </span>
+            <span id="nav-badge-tasks"
+              class="px-2 py-0.5 rounded-full text-[10px] bg-warmcream-200 text-mocha-800">0</span>
+          </button>
+
+          <button data-route="focus"
+            class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition">
+            <span class="flex items-center gap-3">
+              <span class="text-base"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-hourglass"></use></svg></span>
+              <span>Ruang Sesi Fokus</span>
+            </span>
+            <span id="nav-badge-timer"
+              class="hidden px-2 py-0.5 rounded-full text-[10px] bg-sage-600 text-white animate-pulse">Aktif</span>
+          </button>
+
+          <button data-route="brainfall"
+            class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition">
+            <span class="flex items-center gap-3">
+              <span class="text-base"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-smartphone"></use></svg></span>
+              <span>Monitor BrainFall</span>
+            </span>
+            <span id="nav-badge-brainfall"
+              class="px-2 py-0.5 rounded-full text-[10px] bg-sage-100 text-sage-700">Aman</span>
+          </button>
+
+          <button data-route="ai-insight"
+            class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition">
+            <span class="flex items-center gap-3">
+              <span class="text-base"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-sparkles"></use></svg></span>
+              <span>Evaluasi AI Gemini</span>
+            </span>
+          </button>
+
+          <button data-route="architecture"
+            class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition">
+          </button>
+          <span id="nav-indicator" class="nav-indicator" aria-hidden="true"></span>
+        </nav>
+      </div>
+
+      <!-- Bagian Bawah Sidebar: Tombol Cepat Parkir Ide & Logout -->
+      <div class="p-4 border-t border-warmcream-300/70 space-y-2.5 hidden lg:block">
+        <button id="btn-open-idea-drawer" type="button"
+          class="w-full py-2.5 px-3.5 rounded-xl bg-softwhite hover:bg-warmcream-200/70 border border-warmcream-300 text-left transition flex items-center justify-between">
+          <div>
+            <span class="text-xs font-semibold text-mocha-900 block"><svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-message-circle"></use></svg>Panel Parkir Ide</span>
+            <span class="text-[11px] text-mocha-500">Tangkap pikiran impulsif (Alt+P)</span>
+          </div>
+          <span id="sidebar-idea-count"
+            class="px-2 py-0.5 rounded-lg bg-warmcream-200 text-mocha-800 text-xs font-bold">0</span>
+        </button>
+
+        <div class="flex items-center justify-between pt-1">
+          <button id="btn-toggle-zen" type="button" class="text-[11px] text-mocha-600 hover:text-mocha-900 font-medium">
+            <svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-wind"></use></svg>Mode Bebas Distraksi
+          </button>
+          <button id="btn-logout" type="button"
+            class="px-3 py-1.5 rounded-lg border border-terracotta-500/40 bg-terracotta-50 hover:bg-terracotta-100 text-terracotta-700 text-[11px] font-semibold flex items-center transition">
+            <svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-log-out"></use></svg>Keluar
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ======================================================================
+         AREA KONTEN UTAMA MULTI-HALAMAN (SPA VIEWPORT)
+         ====================================================================== -->
+    <main class="flex-1 min-w-0 pb-24 lg:pb-12">
+
+      <!-- TOP BAR KONTEKSTUAL -->
+      <header
+        class="sticky top-0 z-20 bg-softwhite/90 backdrop-blur-md border-b border-warmcream-200 px-5 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p id="header-date-display" class="text-[11px] uppercase tracking-widest text-mocha-500 font-semibold">Rabu, 4
+            November 2026</p>
+          <h2 id="header-page-title" class="font-serif text-xl sm:text-2xl font-semibold text-mocha-900">Dashboard</h2>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+          <!-- Tombol Mode Bebas Distraksi Cepat -->
+          <button id="btn-header-zen" type="button"
+            class="px-3 py-2 rounded-xl bg-warmcream-100 hover:bg-warmcream-200 text-mocha-800 border border-warmcream-300 text-xs font-medium transition flex items-center gap-1.5"
+            title="Redupkan elemen navigasi saat fokus">
+            <span><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-wind"></use></svg></span>
+            <span id="label-zen-mode" class="hidden sm:inline">Mode Tenang</span>
+          </button>
+
+          <!-- Tombol Buka Panel Parkir Ide (Brain Dump) -->
+          <button id="btn-header-parkir-ide" type="button"
+            class="px-3.5 py-2 rounded-xl bg-mocha-800 hover:bg-mocha-900 text-softwhite text-xs font-semibold transition flex items-center gap-2 shadow-sm">
+            <span><svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-message-circle"></use></svg>Parkir Ide</span>
+            <span id="header-idea-badge"
+              class="px-1.5 py-0.5 rounded bg-warmcream-100/20 text-warmcream-100 text-[10px]">0</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="max-w-6xl mx-auto px-5 sm:px-8 pt-6">
+
+        <!-- ==================================================================
+             HALAMAN 1: DASHBOARD
+             ================================================================== -->
+        <section id="view-dashboard" class="spa-view dash">
+          <div class="dash-top">
+            <h3 id="dashboard-greeting" class="dash-greeting">Halo, Nadia.</h3>
+            <div class="dash-actions">
+              <button data-goto="focus" class="dash-btn dash-btn--primary">Mulai Fokus</button>
+              <button data-goto="tasks" class="dash-btn dash-btn--ghost">Tugas</button>
+            </div>
+          </div>
+
+          <div class="dash-stats">
+            <div class="dash-stat dash-stat--a">
+              <span class="dash-stat__icon" aria-hidden="true"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-hourglass"></use></svg></span>
+              <div>
+                <div><span id="stat-focus-mins" class="dash-stat__num">75</span> <span class="dash-stat__unit">/ 120 mnt</span></div>
+                <div class="dash-stat__label">Fokus</div>
+              </div>
+            </div>
+            <div class="dash-stat dash-stat--b">
+              <span class="dash-stat__icon" aria-hidden="true"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-clipboard-list"></use></svg></span>
+              <div>
+                <div><span id="stat-pending-tasks" class="dash-stat__num">4</span> <span class="dash-stat__unit">tugas</span></div>
+                <div class="dash-stat__label">Antrean</div>
+              </div>
+            </div>
+            <div class="dash-stat dash-stat--c">
+              <span class="dash-stat__icon" aria-hidden="true"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-message-circle"></use></svg></span>
+              <div>
+                <div><span id="stat-parked-ideas" class="dash-stat__num">3</span> <span class="dash-stat__unit">ide</span></div>
+                <div class="dash-stat__label">Parkir Ide</div>
+              </div>
+            </div>
+            <div class="dash-stat dash-stat--d">
+              <span class="dash-stat__icon" aria-hidden="true"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-smartphone"></use></svg></span>
+              <div>
+                <div><span id="stat-brainfall-mins" class="dash-stat__num">20</span> <span id="stat-brainfall-limit-label" class="dash-stat__unit">/ 30 mnt</span></div>
+                <div class="dash-stat__label">BrainFall</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Elemen ini dipakai skrip untuk memperbarui data; disembunyikan agar tampilan ringkas -->
+          <div hidden>
+            <span id="stat-focus-sessions-count"></span>
+            <span id="stat-next-deadline"></span>
+            <span id="stat-brainfall-badge"></span>
+          </div>
+
+          <div class="dash-grid">
+            <div class="dash-panel">
+              <div class="dash-panel__head">
+                <h4>Tugas Prioritas</h4>
+                <button data-goto="tasks" class="dash-link">Semua</button>
+              </div>
+              <div class="dash-table-wrap">
+                <table class="dash-table">
+                  <thead><tr><th>Tugas</th><th>Tenggat</th><th>Beban</th><th></th></tr></thead>
+                  <tbody id="dashboard-priority-tasks"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <aside class="dash-ideas">
+              <h4>Parkir Ide</h4>
+              <ul id="dashboard-idea-list"></ul>
+            </aside>
+          </div>
+
+          <div class="dash-panel dash-panel--wide">
+            <div class="dash-panel__head"><h4>Sesi Terbaru</h4></div>
+            <div class="dash-table-wrap">
+              <table class="dash-table">
+                <thead><tr><th>Tugas</th><th>Durasi</th><th>Skor</th></tr></thead>
+                <tbody id="dashboard-session-list"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             HALAMAN 2: MANAJEMEN TUGAS (AUTO-DEADLINE SORTING)
+             ================================================================== -->
+        <section id="view-tasks" class="spa-view hidden tasks">
+          <div class="tasks-layout">
+            <form id="form-add-task" class="task-form">
+              <h3 id="task-form-title" class="task-form__title">Jadwalkan Tugas Baru</h3>
+              <input id="task-desc" type="hidden" value="" />
+              <label class="task-field">Judul
+                <input id="task-title" type="text" required class="task-input" placeholder="Nama tugas" />
+              </label>
+              <label class="task-field">Tenggat
+                <input id="task-deadline" type="datetime-local" required class="task-input" />
+              </label>
+              <div class="task-form__row">
+                <label class="task-field">Beban
+                  <select id="task-load" class="task-input">
+                    <option value="high">Tinggi</option>
+                    <option value="medium" selected>Sedang</option>
+                    <option value="low">Ringan</option>
+                  </select>
+                </label>
+                <label class="task-field">Sesi
+                  <input id="task-pomodoros" type="number" min="1" max="12" value="2" class="task-input" />
+                </label>
+              </div>
+              <label class="task-field">Kategori
+                <input id="task-category" type="text" value="Riset & Penulisan" class="task-input" />
+              </label>
+              <button id="btn-task-submit" type="submit" class="dash-btn dash-btn--primary">Tambahkan</button>
+              <button id="btn-task-cancel" type="button" class="hidden dash-btn dash-btn--ghost task-form__cancel">Batal</button>
+            </form>
+
+            <div class="tasks-main">
+              <div class="seg" style="--i:0">
+                <button type="button" data-task-filter="all" class="task-filter-btn is-active">Semua</button>
+                <button type="button" data-task-filter="pending" class="task-filter-btn">Aktif</button>
+                <button type="button" data-task-filter="completed" class="task-filter-btn">Selesai</button>
+              </div>
+              <div id="tasks-list-container" class="task-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             HALAMAN 3: RUANG SESI FOKUS + TIMER TRACK RECORD + PARKIR IDE PARALEL
+             ================================================================== -->
+        <section id="view-focus" class="spa-view hidden focus">
+          <div class="focus-layout">
+            <!-- Kiri: Parkir Ide -->
+            <div class="focus-col">
+              <div class="focus-card">
+                <div class="focus-card__head">
+                  <h4>Parkir Ide</h4>
+                  <span id="inline-idea-counter" class="dash-chip">0</span>
+                </div>
+                <form id="form-inline-idea" class="focus-idea-form">
+                  <input id="inline-idea-input" type="text" required class="task-input" placeholder="Tulis pikiran, lalu Enter" />
+                  <select id="inline-idea-tag" class="task-input">
+                    <option value="ide_kreatif">Ide</option>
+                    <option value="urusan_mendadak">Urusan</option>
+                    <option value="riset_nanti">Cari</option>
+                    <option value="refleksi">Refleksi</option>
+                  </select>
+                  <button type="submit" class="dash-btn dash-btn--primary">Parkir</button>
+                </form>
+                <div id="inline-ideas-list" class="focus-ideas"></div>
+              </div>
+            </div>
+
+            <!-- Kanan: timer + track record -->
+            <div class="focus-col">
+              <div class="focus-card focus-timer">
+                <div class="seg seg--blue seg--wide" style="--i:0">
+                  <button type="button" data-timer-mode="pomodoro_25" data-mins="25" class="timer-mode-btn is-active">Pomodoro</button>
+                  <button type="button" data-timer-mode="deep_work_50" data-mins="50" class="timer-mode-btn">Deep Work</button>
+                  <button type="button" data-timer-mode="micro_15" data-mins="15" class="timer-mode-btn">Sprint</button>
+                </div>
+
+                <div class="focus-ring">
+                  <svg viewBox="0 0 220 220" aria-hidden="true">
+                    <circle cx="110" cy="110" r="96" fill="none" stroke="#E8F1FB" stroke-width="9" />
+                    <circle id="timer-svg-circle" class="timer-progress-ring" cx="110" cy="110" r="96" fill="none"
+                      stroke="#4A90D9" stroke-width="9" stroke-linecap="round" stroke-dasharray="603.18" stroke-dashoffset="0" />
+                  </svg>
+                  <div class="focus-ring__center">
+                    <span id="timer-status-badge" class="focus-ring__status">Siap</span>
+                    <div id="timer-display" class="focus-ring__time">25:00</div>
+                    <span class="focus-ring__idea" title="Pikiran yang diparkir selama sesi"><svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-message-circle"></use></svg><strong id="timer-distraction-count">0</strong></span>
+                  </div>
+                </div>
+
+                <select id="focus-task-select" class="focus-pill" aria-label="Tugas yang difokuskan">
+                  <option value="">Tanpa tugas</option>
+                </select>
+
+                <div class="focus-controls">
+                  <button id="btn-timer-reset" type="button" class="focus-ctl" aria-label="Reset" title="Reset"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-rotate-ccw"></use></svg></button>
+                  <button id="btn-timer-start" type="button" class="dash-btn dash-btn--primary focus-main"><svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-play"></use></svg>Mulai</button>
+                  <button id="btn-timer-pause" type="button" class="hidden dash-btn dash-btn--primary focus-main"><svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-pause"></use></svg>Jeda</button>
+                  <button id="btn-timer-complete" type="button" class="focus-ctl" aria-label="Catat sesi" title="Catat &amp; selesaikan sesi"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-check"></use></svg></button>
+                </div>
+
+                <div class="focus-meta">
+                  <select id="focus-mood-select" class="task-input" aria-label="Kondisi">
+                    <option value="calm" selected>Tenang</option>
+                    <option value="energized">Berenergi</option>
+                    <option value="tired">Lelah</option>
+                    <option value="overwhelmed">Kewalahan</option>
+                  </select>
+                  <input id="focus-session-note" type="text" class="task-input" placeholder="Catatan sesi" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Riwayat Sesi: kartu lebar penuh agar tabel memanjang ke samping -->
+          <div class="focus-card focus-history">
+            <div class="focus-card__head">
+              <h4>Riwayat Sesi</h4>
+              <span id="track-record-summary" class="dash-chip">75 mnt</span>
+            </div>
+            <div class="dash-table-wrap">
+              <table class="dash-table">
+                <thead><tr><th>Waktu</th><th>Tugas</th><th>Durasi</th><th>Skor</th></tr></thead>
+                <tbody id="focus-track-record-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             HALAMAN 4: FITUR ADAPTASI 'BRAINFALL' (REELS & SHORT-FORM TRACKER)
+             ================================================================== -->
+        <section id="view-brainfall" class="spa-view hidden space-y-6">
+          <!-- Banner Status Batas Aman Harian -->
+          <div id="brainfall-hero-card"
+            class="p-6 sm:p-8 rounded-3xl bg-warmcream-100 border border-warmcream-300 transition-all">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div class="max-w-2xl">
+                <div
+                  class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-softwhite border border-warmcream-300 text-xs font-semibold text-mocha-800">
+                  <span><svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-smartphone"></use></svg>Modul Adaptasi BrainFall</span>
+                  <span>•</span>
+                  <span id="brainfall-status-chip" class="text-sage-700">Zona Dopamin Aman</span>
+                </div>
+                <h3 class="font-serif text-2xl sm:text-3xl font-semibold text-mocha-900 mt-3">
+                  Batas Aman Tontonan Reels Harian
+                </h3>
+                <p class="text-xs sm:text-sm text-mocha-600 mt-2 leading-relaxed">
+                  Tetapkan batas harian Anda dan catat setiap sesi scrolling.
+                </p>
+              </div>
+
+              <!-- Pengaturan Batas Aman Harian -->
+              <div class="p-4 rounded-2xl bg-softwhite border border-warmcream-300 shrink-0 w-full lg:w-72">
+                <label class="block text-[11px] font-semibold uppercase tracking-wider text-mocha-500">Batas Aman
+                  Harian</label>
+                <div class="flex items-center gap-2 mt-2">
+                  <input id="input-brainfall-limit" type="number" min="5" max="180" value="30"
+                    class="w-20 px-3 py-2 rounded-xl bg-warmcream-50 border border-warmcream-300 font-serif text-lg font-semibold text-mocha-900 text-center" />
+                  <span class="text-xs text-mocha-600 font-medium">menit/hari</span>
+                  <button id="btn-save-brainfall-limit" type="button"
+                    class="ml-auto px-3 py-2 rounded-xl bg-mocha-800 text-softwhite text-xs font-semibold hover:bg-mocha-900 transition">
+                    Simpan
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bar Meter Akumulasi Harian -->
+            <div class="mt-6 pt-6 border-t border-warmcream-300/80">
+              <div class="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+                <div>
+                  <span class="text-xs font-semibold text-mocha-800">Hari Ini: </span>
+                  <span id="brainfall-meter-text" class="font-serif text-xl font-semibold text-mocha-900">20 / 30 Menit
+                    (67%)</span>
+                </div>
+                <span id="brainfall-reels-estimate" class="text-xs text-mocha-600">~45 video</span>
+              </div>
+              <div class="w-full h-4 rounded-full bg-softwhite border border-warmcream-300 overflow-hidden p-0.5">
+                <div id="brainfall-meter-bar" class="h-full rounded-full bg-sage-600 transition-all duration-500"
+                  style="width: 67%"></div>
+              </div>
+
+              <!-- Tombol Log Cepat (+5m, +10m, +15m) -->
+              <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <span class="text-xs text-mocha-600 font-medium">Catat Cepat:</span>
+                <div class="flex flex-wrap gap-2">
+                  <button data-quick-reels="5"
+                    class="btn-quick-reels px-3 py-1.5 rounded-xl bg-softwhite hover:bg-warmcream-200 border border-warmcream-300 text-xs font-semibold text-mocha-800 transition">+5m</button>
+                  <button data-quick-reels="10"
+                    class="btn-quick-reels px-3 py-1.5 rounded-xl bg-softwhite hover:bg-warmcream-200 border border-warmcream-300 text-xs font-semibold text-mocha-800 transition">+10m</button>
+                  <button data-quick-reels="15"
+                    class="btn-quick-reels px-3 py-1.5 rounded-xl bg-terracotta-50 hover:bg-terracotta-100 border border-terracotta-500/30 text-xs font-semibold text-terracotta-700 transition">+15m</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Peringatan Alert Aktif jika Melebihi Batas Aman -->
+          <div id="brainfall-alert-banner"
+            class="hidden p-6 rounded-3xl bg-terracotta-50 border-2 border-terracotta-500 text-terracotta-700">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-2 font-bold text-sm uppercase tracking-wider">
+                  <span><svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-siren"></use></svg>Batas Aman Terlampaui</span>
+                </div>
+                <p class="text-xs sm:text-sm mt-1.5 leading-relaxed">
+                  Ambil jeda sejenak sebelum kembali bekerja.
+                </p>
+              </div>
+              <button id="btn-trigger-detox-modal" type="button"
+                class="px-4 py-2.5 rounded-xl bg-terracotta-600 hover:bg-terracotta-700 text-white text-xs font-semibold shrink-0 shadow-sm transition">
+                <svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-wind"></use></svg>Reset Atensi 60 Detik
+              </button>
+            </div>
+          </div>
+
+          <!-- Grid Form Log Detail & Riwayat Log BrainFall -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-5 p-6 rounded-3xl bg-warmcream-50 border border-warmcream-200 h-fit">
+              <h4 class="font-serif text-lg font-semibold text-mocha-900">Jurnal Konsumsi Reels</h4>
+
+              <form id="form-brainfall-log" class="space-y-3.5 mt-4">
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold text-mocha-800 mb-1">Platform</label>
+                    <select id="bf-platform"
+                      class="w-full px-3 py-2 rounded-xl bg-softwhite border border-warmcream-300 text-xs text-mocha-900">
+                      <option value="Instagram Reels">Instagram Reels</option>
+                      <option value="TikTok">TikTok</option>
+                      <option value="YouTube Shorts">YouTube Shorts</option>
+                      <option value="X / Mixed Feeds">X / Mixed Feeds</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-mocha-800 mb-1">Durasi (Menit)</label>
+                    <input id="bf-duration" type="number" min="1" max="240" value="10" required
+                      class="w-full px-3 py-2 rounded-xl bg-softwhite border border-warmcream-300 text-xs text-mocha-900" />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-mocha-800 mb-1">Konteks Pemicu Awal (Trigger)</label>
+                  <select id="bf-trigger"
+                    class="w-full px-3 py-2 rounded-xl bg-softwhite border border-warmcream-300 text-xs text-mocha-900">
+                    <option value="istirahat_kebablasan">Niat istirahat 5 menit tapi kebablasan</option>
+                    <option value="prokrastinasi_tugas">Menghindari tugas yang terasa berat</option>
+                    <option value="kebosanan">Refleks membuka HP saat bosan</option>
+                    <option value="sebelum_tidur">Scrolling pasif sebelum tidur</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-mocha-800 mb-1">Efek Kognitif Setelah Menonton</label>
+                  <select id="bf-aftereffect"
+                    class="w-full px-3 py-2 rounded-xl bg-softwhite border border-warmcream-300 text-xs text-mocha-900">
+                    <option value="biasa_saja">Biasa saja / Netral</option>
+                    <option value="kabut_otak">Kabut otak (Sulit kembali fokus)</option>
+                    <option value="cemas_menyesal">Menyesal waktu terbuang</option>
+                    <option value="segar">Terhibur & siap kembali kerja</option>
+                  </select>
+                </div>
+
+                <button type="submit"
+                  class="w-full py-3 px-4 rounded-xl bg-mocha-800 hover:bg-mocha-900 text-softwhite text-xs font-semibold transition">
+                  Catat ke Log BrainFall
+                </button>
+              </form>
+            </div>
+
+            <div class="lg:col-span-7 p-6 rounded-3xl bg-warmcream-50 border border-warmcream-200">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="font-serif text-lg font-semibold text-mocha-900">Riwayat Reels</h4>
+              </div>
+              <div id="brainfall-logs-list" class="space-y-3"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             HALAMAN 5: INTEGRASI GEMINI API (EVALUASI PSIKOLOGIS HUMANIS)
+             ================================================================== -->
+        <section id="view-ai-insight" class="spa-view hidden space-y-6">
+          <div class="p-6 sm:p-8 rounded-3xl bg-warmcream-100 border border-warmcream-300">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div class="max-w-2xl">
+                <div
+                  class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-softwhite border border-warmcream-300 text-xs font-semibold text-mocha-800">
+                  <span><svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-sparkles"></use></svg>Gemini Cognitive Psychologist Engine</span>
+                </div>
+                <h3 class="font-serif text-2xl sm:text-3xl font-semibold text-mocha-900 mt-3">
+                  Evaluasi Psikologis & Burnout
+                </h3>
+                <p class="text-xs sm:text-sm text-mocha-600 mt-2 leading-relaxed">
+                  Refleksi singkat dari pola fokus, ide yang diparkir, dan BrainFall hari ini.
+                </p>
+              </div>
+
+              <div class="flex flex-col gap-2.5 shrink-0">
+                <button id="btn-generate-ai-eval" type="button"
+                  class="px-5 py-3.5 rounded-2xl bg-mocha-800 hover:bg-mocha-900 text-softwhite font-semibold text-xs shadow-md transition flex items-center justify-center gap-2">
+                  <span><svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-sparkles"></use></svg>Susun Evaluasi Sekarang</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Panel Konfigurasi Opsional Gemini API Key -->
+            <div
+              class="mt-6 pt-5 border-t border-warmcream-300/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div class="text-xs text-mocha-700">
+                <strong class="text-mocha-900">Gemini API Key (Opsional):</strong> kosongkan untuk pakai mesin bawaan.
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <input id="input-gemini-key" type="password"
+                  class="w-full sm:w-64 px-3.5 py-2 rounded-xl bg-softwhite border border-warmcream-300 text-xs text-mocha-900 font-mono"
+                  placeholder="AIzaSy... (Opsional)" />
+                <button id="btn-save-gemini-key" type="button"
+                  class="px-3.5 py-2 rounded-xl bg-softwhite hover:bg-warmcream-200 border border-warmcream-300 text-xs font-semibold text-mocha-800">
+                  Simpan
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kartu Hasil Evaluasi Utama -->
+          <div id="ai-latest-evaluation-card"
+            class="p-6 sm:p-8 rounded-3xl bg-warmcream-50 border border-warmcream-300 shadow-sm"></div>
+
+          <!-- Riwayat Evaluasi Sebelumnya -->
+          <div class="p-6 rounded-3xl bg-warmcream-50 border border-warmcream-200">
+            <h4 class="font-serif text-lg font-semibold text-mocha-900 mb-4">Riwayat Evaluasi</h4>
+            <div id="ai-history-list" class="space-y-3"></div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- ======================================================================
+         NAVIGASI BAWAH UNTUK PERANGKAT SELULER (MOBILE BOTTOM BAR)
+         ====================================================================== -->
+    <nav
+      class="distraction-hide lg:hidden fixed bottom-0 inset-x-0 z-30 bg-softwhite/95 backdrop-blur-md border-t border-warmcream-300 px-2 py-2 grid grid-cols-5 gap-1 text-center">
+      <button data-route="dashboard"
+        class="nav-btn flex flex-col items-center py-1.5 rounded-xl text-[10px] font-semibold">
+        <span class="text-base"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-layout-dashboard"></use></svg></span>
+        <span>Dashboard</span>
+      </button>
+      <button data-route="tasks" class="nav-btn flex flex-col items-center py-1.5 rounded-xl text-[10px] font-semibold">
+        <span class="text-base"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-clipboard-list"></use></svg></span>
+        <span>Tugas</span>
+      </button>
+      <button data-route="focus" class="nav-btn flex flex-col items-center py-1.5 rounded-xl text-[10px] font-semibold">
+        <span class="text-base"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-hourglass"></use></svg></span>
+        <span>Fokus</span>
+      </button>
+      <button data-route="brainfall"
+        class="nav-btn flex flex-col items-center py-1.5 rounded-xl text-[10px] font-semibold">
+        <span class="text-base"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-smartphone"></use></svg></span>
+        <span>BrainFall</span>
+      </button>
+      <button data-route="ai-insight"
+        class="nav-btn flex flex-col items-center py-1.5 rounded-xl text-[10px] font-semibold">
+        <span class="text-base"><svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-sparkles"></use></svg></span>
+        <span>AI Evaluasi</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ========================================================================
+       DRAWER SLIDE-OVER PARALEL "PARKIR IDE" (ACCESSIBLE DARI HALAMAN MANAPUN)
+       ======================================================================== -->
+  <div id="drawer-parkir-ide" class="fixed inset-0 z-50 hidden">
+    <div id="drawer-backdrop" class="absolute inset-0 bg-mocha-900/40 backdrop-blur-xs"></div>
+    <aside
+      class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-softwhite border-l border-warmcream-300 shadow-2xl flex flex-col justify-between p-6">
+      <div class="flex flex-col h-full">
+        <div class="flex items-center justify-between pb-4 border-b border-warmcream-200">
+          <div>
+            <span class="text-[11px] uppercase tracking-widest text-mocha-500 font-semibold">Brain Dump Paralel</span>
+            <h3 class="font-serif text-xl font-semibold text-mocha-900"><svg class="ic ic-m" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-message-circle"></use></svg>Parkir Ide Impulsif</h3>
+          </div>
+          <button id="btn-close-drawer"
+            class="w-8 h-8 rounded-lg bg-warmcream-100 hover:bg-warmcream-200 text-mocha-800 flex items-center justify-center text-sm">
+            <svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-x"></use></svg>
+          </button>
+        </div>
+
+        <p class="text-xs text-mocha-600 mt-3 leading-relaxed">
+          Simpan lintasan pikiran yang muncul tiba-tiba agar tidak mengganggu tugas utama Anda. Anda dapat mempromosikan
+          ide di bawah menjadi item Tugas kapan saja.
+        </p>
+
+        <form id="form-drawer-idea" class="mt-4 space-y-2.5">
+          <textarea id="drawer-idea-input" rows="2" required
+            class="w-full px-3.5 py-2.5 rounded-xl bg-warmcream-50 border border-warmcream-300 text-xs text-mocha-900 focus:outline-none focus:border-mocha-700"
+            placeholder="Tulis lintasan ide atau hal yang tiba-tiba teringat..."></textarea>
+          <div class="flex items-center gap-2">
+            <select id="drawer-idea-tag"
+              class="px-3 py-2 rounded-xl bg-warmcream-50 border border-warmcream-300 text-xs text-mocha-800">
+              <option value="ide_kreatif">Ide Kreatif</option>
+              <option value="urusan_mendadak">Urusan Mendadak</option>
+              <option value="riset_nanti">Riset Nanti</option>
+              <option value="refleksi">Refleksi Diri</option>
+            </select>
+            <button type="submit"
+              class="flex-1 py-2 px-4 rounded-xl bg-mocha-800 hover:bg-mocha-900 text-softwhite text-xs font-semibold transition">
+              + Parkir Sekarang
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-5 flex-1 overflow-y-auto space-y-2.5 pr-1" id="drawer-ideas-list"></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ========================================================================
+       MODAL INTERVENSI JEDA KOGNITIF BRAINFALL (SAAT OVERLIMIT REELS)
+       ======================================================================== -->
+  <div id="modal-brainfall-detox" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-mocha-900/50 backdrop-blur-xs" id="modal-detox-backdrop"></div>
+    <div
+      class="relative bg-softwhite border border-warmcream-300 rounded-3xl max-w-lg w-full p-6 sm:p-8 text-center shadow-2xl">
+      <div
+        class="w-16 h-16 rounded-full bg-terracotta-100 text-terracotta-700 flex items-center justify-center mx-auto text-2xl">
+        <svg class="ic" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-leaf"></use></svg>
+      </div>
+      <span class="text-[11px] uppercase tracking-widest text-terracotta-600 font-bold block mt-3">Intervensi Psikologi
+        Kognitif</span>
+      <h3 class="font-serif text-2xl font-semibold text-mocha-900 mt-1">Batas Aman Tontonan Reels Terlampaui</h3>
+      <p class="text-xs sm:text-sm text-mocha-600 mt-2.5 leading-relaxed">
+        Otak Anda baru saja menerima ratusan stimulus visual berganti cepat. Sebelum kembali ke tugas utama, lakukan
+        <strong>Jeda Dekompresi Dopamin</strong> selama beberapa napas dalam agar rentang atensi pulih.
+      </p>
+
+      <div class="my-6 p-5 rounded-2xl bg-warmcream-100 border border-warmcream-300">
+        <p class="font-serif italic text-mocha-800 text-sm">
+          "Tarik napas perlahan selama 4 detik... tahan 4 detik... embuskan perlahan selama 6 detik. Alihkan pandangan
+          ke objek sejauh 6 meter dari layar."
+        </p>
+      </div>
+
+      <div class="flex items-center justify-center gap-3">
+        <button id="btn-close-detox-modal" type="button"
+          class="px-5 py-2.5 rounded-xl bg-mocha-800 hover:bg-mocha-900 text-softwhite text-xs font-semibold transition">
+          Saya Sudah Menjauhkan Ponsel & Siap Fokus
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       LOGIKA UTAMA VANILLA JAVASCRIPT SPA KALAFOKUS
+       ======================================================================== -->
+  <script src="./assets/js/app.js"></script>
+</body>
+
+</html>
