@@ -6,6 +6,7 @@
 
 console.log("hello world")
 console.log("ini aid")
+console.log("halo aid")
 const CACHE_NAME = 'kalafokus-editorial-v1';
 const CORE_ASSETS = [
   './',
