@@ -1,34 +1,25 @@
-<!-- src/components/layout/MobileBottomNav.vue -->
+<script setup>
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const navItems = [
+  { name: 'Home', path: '/' },
+  { name: 'Fokus', path: '/focus' },
+  { name: 'Tugas', path: '/tasks' },
+  { name: 'Brainfall', path: '/brainfall' },
+  { name: 'AI', path: '/ai-insight' }
+]
+</script>
+
 <template>
   <nav
-    v-show="!state.isZenMode"
-    class="distraction-hide lg:hidden fixed bottom-0 inset-x-0 z-30 bg-softwhite/95 backdrop-blur-md border-t border-warmcream-300 px-2 py-2 grid grid-cols-5 gap-1 text-center"
-  >
-    <button
-      v-for="item in items"
-      :key="item.route"
-      type="button"
-      class="nav-btn flex flex-col items-center py-1.5 rounded-xl text-[10px] font-semibold"
-      :class="state.currentRoute === item.route ? 'bg-warmcream-100 text-mocha-900' : 'text-mocha-600'"
-      @click="navigate(item.route)"
-    >
-      <span class="text-base"><BaseIcon :name="item.icon" /></span>
-      <span>{{ item.label }}</span>
-    </button>
+    class="fixed bottom-0 inset-x-0 z-40 bg-slate-900/95 backdrop-blur border-t border-slate-800 flex justify-around items-center h-16 px-2">
+    <RouterLink v-for="item in navItems" :key="item.path" :to="item.path"
+      class="flex flex-col items-center justify-center py-1 px-3 rounded-xl text-xs font-medium transition"
+      :class="route.path === item.path ? 'text-indigo-400 font-semibold' : 'text-slate-400 hover:text-slate-200'">
+      <span>{{ item.name }}</span>
+      <span v-if="route.path === item.path" class="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1"></span>
+    </RouterLink>
   </nav>
 </template>
-
-<script setup>
-import { useKalaFokus } from '../../composables/useKalaFokus';
-import BaseIcon from '../ui/BaseIcon.vue';
-
-const { state, navigate } = useKalaFokus();
-
-const items = [
-  { route: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
-  { route: 'tasks', label: 'Tugas', icon: 'clipboard-list' },
-  { route: 'focus', label: 'Fokus', icon: 'hourglass' },
-  { route: 'brainfall', label: 'BrainFall', icon: 'smartphone' },
-  { route: 'ai-insight', label: 'AI Evaluasi', icon: 'sparkles' }
-];
-</script>

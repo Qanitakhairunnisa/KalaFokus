@@ -2,43 +2,25 @@
 <template>
   <section class="spa-view dash">
     <div class="dash-top">
-      <h3 class="dash-greeting">Halo, {{ state.user.name.split(' ')[0] }}.</h3>
+      <h3 class="dash-greeting">Halo, {{ firstName }}.</h3>
       <div class="dash-actions">
-        <button type="button" class="dash-btn dash-btn--primary" @click="navigate('focus')">Mulai Fokus</button>
-        <button type="button" class="dash-btn dash-btn--ghost" @click="navigate('tasks')">Tugas</button>
+        <button type="button" class="dash-btn dash-btn--primary" @click="navigate('focus')">
+          Mulai Fokus
+        </button>
+        <button type="button" class="dash-btn dash-btn--ghost" @click="navigate('tasks')">
+          Tugas
+        </button>
       </div>
     </div>
 
     <!-- Pemakaian Reusable StatCard -->
     <div class="dash-stats">
-      <StatCard
-        variant="a"
-        icon="hourglass"
-        :value="focusMinutesToday"
-        :unit="`/ ${state.user.focusTarget} mnt`"
-        label="Fokus"
-      />
-      <StatCard
-        variant="b"
-        icon="clipboard-list"
-        :value="pendingTasks.length"
-        unit="tugas"
-        label="Antrean"
-      />
-      <StatCard
-        variant="c"
-        icon="message-circle"
-        :value="state.ideas.length"
-        unit="ide"
-        label="Parkir Ide"
-      />
-      <StatCard
-        variant="d"
-        icon="smartphone"
-        :value="brainfallMinutesToday"
-        :unit="`/ ${state.user.reelsLimit} mnt`"
-        label="BrainFall"
-      />
+      <StatCard variant="a" icon="hourglass" :value="focusMinutesToday" :unit="`/ ${state.user.focusTarget || 120} mnt`"
+        label="Fokus" />
+      <StatCard variant="b" icon="clipboard-list" :value="pendingTasks.length" unit="tugas" label="Antrean" />
+      <StatCard variant="c" icon="message-circle" :value="state.ideas.length" unit="ide" label="Parkir Ide" />
+      <StatCard variant="d" icon="smartphone" :value="brainfallMinutesToday"
+        :unit="`/ ${state.user.reelsLimit || 30} mnt`" label="BrainFall" />
     </div>
 
     <div class="dash-grid">
@@ -50,15 +32,27 @@
         <div class="dash-table-wrap">
           <table class="dash-table">
             <thead>
-              <tr><th>Tugas</th><th>Tenggat</th><th>Beban</th><th></th></tr>
+              <tr>
+                <th>Tugas</th>
+                <th>Tenggat</th>
+                <th>Beban</th>
+                <th></th>
+              </tr>
             </thead>
             <tbody>
               <tr v-for="task in pendingTasks.slice(0, 4)" :key="task.id">
                 <td class="dash-cell-title font-medium">{{ task.title }}</td>
-                <td>{{ task.deadline.replace('T', ' ') }}</td>
+                <td>{{ formatDeadline(task.deadline) }}</td>
                 <td><span>{{ task.load }}</span></td>
                 <td>
-                  <button type="button" class="dash-link" @click="navigate('focus')">Fokus</button>
+                  <button type="button" class="dash-link" @click="startFocusOnTask(task.id)">
+                    Fokus
+                  </button>
+                </td>
+              </tr>
+              <tr v-if="pendingTasks.length === 0">
+                <td colspan="4" class="text-center py-4 text-xs opacity-60">
+                  Semua tugas selesai! Tambahkan tugas baru di menu Tugas.
                 </td>
               </tr>
             </tbody>
@@ -67,12 +61,18 @@
       </BasePanel>
 
       <aside class="dash-ideas">
-        <h4>Parkir Ide</h4>
-        <ul>
+        <div class="flex items-center justify-between mb-2">
+          <h4>Parkir Ide</h4>
+          <button type="button" class="dash-link text-xs" @click="state.isIdeaDrawerOpen = true">
+            + Tambah
+          </button>
+        </div>
+        <ul v-if="state.ideas.length > 0">
           <li v-for="idea in state.ideas.slice(0, 4)" :key="idea.id">
             {{ idea.text }}
           </li>
         </ul>
+        <p v-else class="text-xs opacity-60 py-2">Belum ada ide yang diparkir.</p>
       </aside>
     </div>
 
@@ -80,13 +80,22 @@
       <div class="dash-table-wrap">
         <table class="dash-table">
           <thead>
-            <tr><th>Tugas</th><th>Durasi</th><th>Skor</th></tr>
+            <tr>
+              <th>Tugas</th>
+              <th>Durasi</th>
+              <th>Skor</th>
+            </tr>
           </thead>
           <tbody>
             <tr v-for="session in state.sessions" :key="session.id">
               <td class="dash-cell-title">{{ session.taskTitle }}</td>
               <td>{{ session.duration }} mnt</td>
               <td>{{ session.score }}%</td>
+            </tr>
+            <tr v-if="!state.sessions || state.sessions.length === 0">
+              <td colspan="3" class="text-center py-4 text-xs opacity-60">
+                Belum ada riwayat sesi fokus hari ini.
+              </td>
             </tr>
           </tbody>
         </table>
@@ -96,9 +105,35 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { useKalaFokus } from '../composables/useKalaFokus';
 import StatCard from '../components/ui/StatCard.vue';
 import BasePanel from '../components/ui/BasePanel.vue';
 
-const { state, focusMinutesToday, pendingTasks, brainfallMinutesToday, navigate } = useKalaFokus();
+const {
+  state,
+  focusMinutesToday,
+  pendingTasks,
+  brainfallMinutesToday,
+  navigate,
+  selectTaskForFocus
+} = useKalaFokus();
+
+const firstName = computed(() => {
+  return (state.user?.name || 'Teman').split(' ')[0];
+});
+
+function formatDeadline(deadline) {
+  if (!deadline) return '-';
+  return deadline.replace('T', ' ');
+}
+
+function startFocusOnTask(taskId) {
+  if (selectTaskForFocus) {
+    selectTaskForFocus(taskId);
+  } else {
+    state.activeTaskId = taskId;
+  }
+  navigate('focus');
+}
 </script>

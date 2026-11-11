@@ -1,296 +1,1066 @@
+@import "tailwindcss";
+
+/**
+ * KALAFOKUS — Stylesheet Editorial Kognitif & Distraction-Free UI
+ * Palet Utama:
+ *  - Soft White  : #FFFFFF
+ *  - Warm Cream  : #E8F1FB / #EAE3D2
+ *  - Deep Mocha  : #2F6AAE / #4A6A8F / #1B3556
+ *  - Calm Sage   : #4F9BD9
+ *  - Amber Alert : #D4505F
+ */
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+  --bg-soft-white: #FFFFFF;
+  --bg-warm-cream: #E8F1FB;
+  --bg-card-cream: #F7FAFE;
+  --border-sand: #D6E6F8;
+  --mocha-deep: #1B3556;
+  --mocha-primary: #2F6AAE;
+  --mocha-muted: #6584A8;
+  --sage-calm: #4F9BD9;
+  --terracotta-alert: #C45B43;
 }
 
 body {
-  margin: 0;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-soft-white);
+  color: var(--mocha-deep);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+.font-editorial {
+  font-family: 'Lora', Georgia, serif;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+/* Transisi halus antar-halaman SPA */
+.spa-view {
+  animation: fadeSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
-
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.hero {
-  position: relative;
+/* Animasi lingkaran pernapasan fokus (Attention Restoration) */
+@keyframes calmBreathe {
 
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.25;
   }
 
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
+  50% {
+    transform: scale(1.06);
+    opacity: 0.48;
   }
 }
 
-#app {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+.breathe-ring {
+  animation: calmBreathe 6s ease-in-out infinite;
 }
 
-#center {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+/* Progress Ring Timer SVG */
+.timer-progress-ring {
+  transition: stroke-dashoffset 0.6s ease;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
 }
 
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+/* Mode Bebas Distraksi (Zen Mode saat Sesi Fokus berjalan) */
+body.distraction-free-active .distraction-hide {
+  opacity: 0.15;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
 }
 
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+body.distraction-free-active .distraction-hide:hover {
+  opacity: 0.95;
+  pointer-events: auto;
 }
 
-#next-steps ul {
-  list-style: none;
+/* Scrollbar halus bergaya editorial */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #E8F1FB;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #B5D0EE;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7DA7D6;
+}
+
+/* ==========================================================================
+   DASHBOARD — biru pastel & putih
+   ========================================================================== */
+.dash {
+  --d-bg: #F1F7FE;
+  --d-card: #FFFFFF;
+  --d-ink: #1B3556;
+  --d-body: #44607F;
+  --d-mute: #7F98B5;
+  --d-row: #F1F7FE;
+  --d-line: #DCE9F8;
+  --d-blue: #4A90D9;
+  background: transparent;
   padding: 0;
+  color: var(--d-ink);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.dash h3,
+.dash h4 {
+  font-family: inherit;
+  margin: 0;
+}
+
+.dash-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.dash-greeting {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.dash-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.dash-btn {
+  padding: 9px 20px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .15s ease;
+}
+
+.dash-btn:hover {
+  transform: translateY(-1px);
+}
+
+.dash-btn--primary {
+  background: var(--d-blue);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(74, 144, 217, .3);
+}
+
+.dash-btn--ghost {
+  background: #fff;
+  color: var(--d-ink);
+  border: 1px solid var(--d-line);
+}
+
+.dash-btn:focus-visible,
+.dash-link:focus-visible,
+.dash-mini-btn:focus-visible {
+  outline: 2px solid var(--d-blue);
+  outline-offset: 2px;
+}
+
+/* Kartu metrik: gradasi biru pastel */
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dash-stat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px;
+  border-radius: 18px;
+  color: #17365C;
+}
+
+.dash-stat--a {
+  background: linear-gradient(135deg, #BFE0FB, #8CC4F3);
+}
+
+.dash-stat--b {
+  background: linear-gradient(135deg, #D3E8FC, #A5D0F6);
+}
+
+.dash-stat--c {
+  background: linear-gradient(135deg, #C4DCF8, #92B9EC);
+}
+
+.dash-stat--d {
+  background: linear-gradient(135deg, #DCEEFD, #B3D8F7);
+}
+
+.dash-stat__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .6);
+  font-size: 20px;
+}
+
+.dash-stat__num {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.dash-stat__unit {
+  font-size: 11px;
+  opacity: .85;
+}
+
+.dash-stat__label {
+  margin-top: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: .9;
+}
+
+/* Panel putih */
+.dash-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dash-panel {
+  min-width: 0;
+  padding: 20px;
+  border-radius: 18px;
+  background: var(--d-card);
+  border: 1px solid var(--d-line);
+}
+
+.dash-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.dash-panel__head h4 {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.dash-link {
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  color: var(--d-blue);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dash-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dash-table-wrap {
+  overflow-x: auto;
+}
+
+.dash-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+  font-size: 12px;
+}
+
+.dash-table th {
+  padding: 0 10px 4px;
+  text-align: left;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--d-mute);
+}
+
+.dash-table td {
+  padding: 10px;
+  background: var(--d-row);
+  color: var(--d-body);
+  vertical-align: middle;
+}
+
+.dash-table td:first-child {
+  border-radius: 10px 0 0 10px;
+}
+
+.dash-table td:last-child {
+  border-radius: 0 10px 10px 0;
+}
+
+.dash-cell-title {
+  max-width: 300px;
+  font-weight: 600;
+  color: var(--d-ink) !important;
+}
+
+.dash-empty {
+  text-align: center;
+  color: var(--d-mute) !important;
+  border-radius: 10px !important;
+}
+
+.dash-mini-btn {
+  padding: 5px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--d-blue);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dash-mini-btn:hover {
+  background: #3A7FC8;
+}
+
+/* Daftar ide: biru pastel, tanpa ungu */
+.dash-ideas {
+  min-width: 0;
+  padding: 20px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #CFE6FC, #B0D4F6);
+  color: #17365C;
+}
+
+.dash-ideas h4 {
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.dash-ideas ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-ideas li {
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .7);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.dash-ideas li:last-child {
+  border-bottom: 0;
+}
+
+@media (max-width: 1023px) {
+  .dash-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dash-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .dash-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-btn {
+    transition: none;
+  }
+}
+
+/* Variabel warna bersama (dipakai di luar .dash juga) */
+:root {
+  --d-bg: #F1F7FE;
+  --d-card: #FFFFFF;
+  --d-ink: #1B3556;
+  --d-body: #44607F;
+  --d-mute: #7F98B5;
+  --d-row: #F1F7FE;
+  --d-line: #DCE9F8;
+  --d-blue: #4A90D9;
+}
+
+/* ==========================================================================
+   MANAJEMEN TUGAS — form di kiri, daftar ringkas di kanan
+   ========================================================================== */
+.tasks {
+  color: var(--d-ink);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.tasks-layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.tasks-main>*+* {
+  margin-top: 16px;
+}
+
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid var(--d-line);
+}
+
+.task-form__title {
+  margin: 0 0 4px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.task-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.task-form .dash-btn {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.task-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--d-body);
+}
+
+.task-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--d-line);
+  background: #F7FAFE;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--d-ink);
+}
+
+.task-input:focus {
+  outline: 2px solid var(--d-blue);
+  background: #fff;
+}
+
+/* Filter status: indikator putih yang bergeser */
+.seg {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 4px;
+  border-radius: 12px;
+  background: #E8F1FB;
+}
+
+.seg::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / 3);
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(47, 106, 174, .15);
+  transform: translateX(calc(var(--i, 0) * 100%));
+  transition: transform .32s cubic-bezier(.4, 0, .2, 1);
+}
+
+.seg button {
+  position: relative;
+  z-index: 1;
+  padding: 7px 20px;
+  border: 0;
+  background: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--d-body);
+  cursor: pointer;
+  transition: color .2s;
+}
+
+.seg button.is-active {
+  color: var(--d-ink);
+}
+
+.seg button:focus-visible {
+  outline: 2px solid var(--d-blue);
+  outline-offset: 2px;
+  border-radius: 9px;
+}
+
+/* Kartu tugas */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.task-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--d-line);
+  box-shadow: 0 6px 18px rgba(47, 106, 174, .06);
+}
+
+.task-card.is-done {
+  opacity: .6;
+}
+
+.task-card.is-done .task-card__title {
+  text-decoration: line-through;
+  color: var(--d-mute);
+}
+
+.task-card__check {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--d-blue);
+  cursor: pointer;
+}
+
+.task-card__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.task-card__title {
+  margin: 0;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.task-card__tag {
+  padding: 1px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--d-blue);
+  color: var(--d-blue);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.task-card__side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-card__del {
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: .55;
+}
+
+.task-card__del:hover {
+  background: #FFF1F2;
+  opacity: 1;
+}
+
+.task-card__del:focus-visible {
+  outline: 2px solid var(--d-blue);
+  outline-offset: 2px;
+}
+
+.task-list.is-switching .task-card {
+  animation: taskIn .32s ease both;
+}
+
+.task-list.is-switching .task-card:nth-child(2) {
+  animation-delay: .04s;
+}
+
+.task-list.is-switching .task-card:nth-child(3) {
+  animation-delay: .08s;
+}
+
+.task-list.is-switching .task-card:nth-child(n+4) {
+  animation-delay: .12s;
+}
+
+@keyframes taskIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Tombol global dashboard/tugas */
+.dash-mini-btn {
+  background: var(--d-blue);
+}
+
+/* ==========================================================================
+   SIDEBAR — indikator menu aktif yang bergeser saat berpindah halaman
+   ========================================================================== */
+.nav-indicator {
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 16px;
+  height: 0;
+  margin: 0 !important;
+  border-radius: 12px;
+  background: #2F6AAE;
+  box-shadow: 0 6px 14px rgba(47, 106, 174, .25);
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+  transition: transform .38s cubic-bezier(.4, 0, .2, 1), height .38s cubic-bezier(.4, 0, .2, 1), opacity .2s;
+}
+
+.nav-indicator.is-on {
+  opacity: 1;
+}
+
+nav[aria-label="Navigasi Utama"] .nav-btn {
+  position: relative;
+  z-index: 1;
+  transition: color .25s ease, background-color .2s ease;
+}
+
+nav[aria-label="Navigasi Utama"] .nav-btn.bg-mocha-800 {
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 900px) {
+  .tasks-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .task-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .task-card__side {
+    grid-column: 1 / -1;
+    justify-content: space-between;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .seg::before,
+  .nav-indicator,
+  .task-list.is-switching .task-card {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   RUANG SESI FOKUS — progres, timer cincin, parkir ide, riwayat
+   ========================================================================== */
+.focus {
+  color: var(--d-ink);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.focus-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.focus-col {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.focus-col>*+* {
+  margin-top: 20px;
+}
+
+.focus-card {
+  min-width: 0;
+  padding: 20px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid var(--d-line);
+  box-shadow: 0 6px 18px rgba(47, 106, 174, .05);
+}
+
+.focus-col>.focus-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.focus-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.focus-card__head h4 {
+  margin: 0;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.focus-history {
+  margin-top: 20px;
+}
+
+.focus-idea-form {
   display: flex;
   gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
+  flex: none;
 }
 
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
+.focus-idea-form .task-input {
+  width: auto;
+  min-width: 0;
 }
 
-.ticks {
-  position: relative;
+.focus-idea-form .task-input:first-child {
+  flex: 1;
+}
+
+.focus-ideas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-height: 160px;
+  margin-top: 14px;
+  padding-right: 2px;
+  overflow-y: auto;
+}
+
+/* Timer */
+.focus-timer {
+  text-align: center;
+}
+
+.seg--wide {
+  display: grid;
   width: 100%;
+}
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
+.seg--wide button {
+  padding: 10px 8px;
+}
+
+.seg--blue::before {
+  background: var(--d-blue);
+  box-shadow: 0 4px 12px rgba(74, 144, 217, .35);
+}
+
+.seg--blue button.is-active {
+  color: #fff;
+}
+
+.focus-ring {
+  position: relative;
+  width: min(280px, 100%);
+  aspect-ratio: 1;
+  margin: 24px auto 18px;
+}
+
+.focus-ring>svg {
+  width: 100%;
+  height: 100%;
+}
+
+.focus-ring__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.focus-ring__status {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--d-mute);
+}
+
+.focus-ring__time {
+  font-size: clamp(44px, 7vw, 58px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.focus-ring__idea {
+  font-size: 12px;
+  color: var(--d-mute);
+}
+
+.focus-ring__idea strong {
+  color: var(--d-ink);
+}
+
+.focus-pill {
+  max-width: 100%;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--d-line);
+  background: #F7FAFE;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--d-ink);
+  text-align: center;
+  text-align-last: center;
+}
+
+.focus-pill:focus-visible,
+.focus-ctl:focus-visible {
+  outline: 2px solid var(--d-blue);
+  outline-offset: 2px;
+}
+
+.focus-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.focus-main {
+  min-width: 120px;
+  padding: 11px 24px;
+  font-size: 13px;
+}
+
+.focus-ctl {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--d-line);
+  background: #fff;
+  font-size: 17px;
+  color: var(--d-ink);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(47, 106, 174, .08);
+  transition: transform .15s ease;
+}
+
+.focus-ctl:hover {
+  transform: translateY(-1px);
+}
+
+.focus-meta {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--d-line);
+}
+
+@media (max-width: 900px) {
+  .focus-layout {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
+  .focus-layout>.focus-col:nth-child(2) {
+    order: -1;
   }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .focus-progress__bar,
+  .focus-ctl {
+    transition: none;
   }
+}
+
+/* Ikon SVG (menggantikan emoji): ukuran kecil, warna mengikuti teks (biru/putih) */
+.ic {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex: none;
+  vertical-align: -0.125em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ic-m {
+  margin-right: .4em;
+}
+
+.nav-btn .ic {
+  width: 16px;
+  height: 16px;
+}
+
+.dash-stat__icon {
+  color: #2F6AAE;
+}
+
+.dash-stat__icon .ic {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+
+.focus-ctl {
+  display: inline-grid;
+  place-items: center;
+}
+
+.focus-ctl .ic {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+}
+
+.focus-ring__idea {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.focus-ring__idea .ic {
+  width: 12px;
+  height: 12px;
+  margin: 0;
+  vertical-align: middle;
+}
+
+.task-card__edit {
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 14px;
+  color: #2F6AAE;
+  cursor: pointer;
+  opacity: .65;
+}
+
+.task-card__edit:hover {
+  background: #E8F1FB;
+  opacity: 1;
+}
+
+.task-card__edit:focus-visible {
+  outline: 2px solid var(--d-blue);
+  outline-offset: 2px;
+}
+
+.task-card__edit .ic,
+.task-card__del .ic {
+  width: 15px;
+  height: 15px;
+  vertical-align: middle;
+}
+
+.task-card.is-editing {
+  border-color: var(--d-blue);
+  box-shadow: 0 0 0 3px rgba(74, 144, 217, .18);
+}
+
+.task-form.is-editing {
+  border-color: var(--d-blue);
+  box-shadow: 0 0 0 3px rgba(74, 144, 217, .15);
+}
+
+.task-form__cancel {
+  width: 100%;
+}
+
+/* Badge tidak boleh terpecah ke banyak baris; tabel digulir horizontal di layar sempit */
+.dash-table td:not(.dash-cell-title),
+.dash-table td span,
+.task-card__side span {
+  white-space: nowrap;
+}
+
+.dash-table {
+  min-width: 460px;
+}
+
+.task-card__side {
+  flex-wrap: wrap;
 }
