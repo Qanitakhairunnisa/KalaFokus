@@ -4,6 +4,7 @@
  * secara instan dan mendukung pemicu instalasi "Add to Home Screen".
  */
 
+console.log("hello world")
 const CACHE_NAME = 'kalafokus-editorial-v1';
 const CORE_ASSETS = [
   './',
