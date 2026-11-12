@@ -1,139 +1,168 @@
-<!-- src/views/AuthView.vue -->
-<template>
-  <section
-    class="min-h-screen flex items-center justify-center p-5 sm:p-10 relative overflow-hidden bg-gradient-to-br from-mocha-700 via-mocha-800 to-mocha-900">
-    <span class="pointer-events-none absolute -top-8 -left-8 w-24 h-24 rounded-full border-2 border-white/25"></span>
-    <span class="pointer-events-none absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-white/10"></span>
-
-    <div
-      class="relative z-10 w-full max-w-4xl bg-softwhite rounded-[28px] sm:rounded-[36px] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
-      <div class="hidden lg:block relative bg-mocha-800">
-        <img src="./download (36).jpg'" @error="onImageError" alt="Ilustrasi KalaFokus"
-          class="w-full h-full object-cover" />
-      </div>
-
-      <div class="p-8 sm:p-10 lg:p-12 flex flex-col justify-center">
-        <div>
-          <h2 class="font-serif text-2xl sm:text-[26px] font-bold text-mocha-900">
-            {{ isRegister ? 'Buat Akun Baru' : 'Masuk ke Akun Anda' }}
-          </h2>
-          <p class="text-xs sm:text-sm text-mocha-600 mt-1.5 leading-relaxed">
-            Kelola fokus tanpa batas. Gratis selamanya.
-          </p>
-        </div>
-
-        <!-- Form Login -->
-        <form v-if="!isRegister" class="space-y-4 mt-7" @submit.prevent="handleLogin">
-          <input v-model="loginEmail" type="email" required
-            class="w-full py-2.5 border-b border-warmcream-300 bg-transparent text-sm text-mocha-900 focus:outline-none focus:border-mocha-700 transition"
-            placeholder="Email" />
-          <input v-model="loginPassword" type="password" required
-            class="w-full py-2.5 border-b border-warmcream-300 bg-transparent text-sm text-mocha-900 focus:outline-none focus:border-mocha-700 transition"
-            placeholder="Password" />
-          <div class="pt-2 flex items-center justify-center">
-            <button type="submit"
-              class="px-7 py-2.5 rounded-full bg-mocha-800 hover:bg-mocha-900 text-softwhite font-semibold text-sm shadow-sm transition flex items-center gap-2 cursor-pointer">
-              <span>Masuk</span>
-              <BaseIcon name="arrow-right" />
-            </button>
-          </div>
-        </form>
-
-        <!-- Form Registrasi -->
-        <form v-else class="space-y-4 mt-7" @submit.prevent="handleRegister">
-          <input v-model="regForm.name" type="text" required
-            class="w-full py-2.5 border-b border-warmcream-300 bg-transparent text-sm text-mocha-900 focus:outline-none focus:border-mocha-700 transition"
-            placeholder="Nama atau nickname" />
-          <input v-model="regForm.email" type="email" required
-            class="w-full py-2.5 border-b border-warmcream-300 bg-transparent text-sm text-mocha-900 focus:outline-none focus:border-mocha-700 transition"
-            placeholder="Email" />
-          <input v-model="regForm.password" type="password" minlength="8" required
-            class="w-full py-2.5 border-b border-warmcream-300 bg-transparent text-sm text-mocha-900 focus:outline-none focus:border-mocha-700 transition"
-            placeholder="Password (min. 8 karakter)" />
-          <div class="grid grid-cols-2 gap-4 pt-1">
-            <div>
-              <label class="block text-[11px] font-semibold text-mocha-500 mb-1">Profil Kognitif</label>
-              <select v-model="regForm.profile"
-                class="w-full py-1.5 border-b border-warmcream-300 bg-transparent text-xs text-mocha-900 focus:outline-none">
-                <option value="deep_thinker">Deep Thinker (50m)</option>
-                <option value="balanced_explorer">Balanced (25m)</option>
-                <option value="sprint_worker">Sprint Worker (15m)</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-mocha-500 mb-1">Batas Reels/Hari</label>
-              <input v-model.number="regForm.reelsLimit" type="number" min="10" max="120"
-                class="w-full py-1.5 border-b border-warmcream-300 bg-transparent text-xs text-mocha-900 focus:outline-none" />
-            </div>
-          </div>
-          <div class="pt-2 flex items-center justify-center">
-            <button type="submit"
-              class="px-7 py-2.5 rounded-full bg-mocha-800 hover:bg-mocha-900 text-softwhite font-semibold text-sm shadow-sm transition flex items-center gap-2 cursor-pointer">
-              <span>Daftar</span>
-              <BaseIcon name="arrow-right" />
-            </button>
-          </div>
-        </form>
-
-        <p class="text-center text-xs text-mocha-600 mt-6">
-          <span v-if="!isRegister">
-            Belum punya akun?
-            <button type="button" class="text-mocha-800 font-semibold hover:underline" @click="isRegister = true">
-              Daftar
-            </button>
-          </span>
-          <span v-else>
-            Sudah punya akun?
-            <button type="button" class="text-mocha-800 font-semibold hover:underline" @click="isRegister = false">
-              Masuk
-            </button>
-          </span>
-        </p>
-      </div>
-    </div>
-  </section>
-</template>
-
 <script setup>
-import { ref, reactive } from 'vue';
-import { useKalaFokus } from '../composables/useKalaFokus';
-import BaseIcon from '../components/ui/BaseIcon.vue';
+// src/views/AuthView.vue
+import { ref, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuth } from '../composables/useAuth'
+import AuthForm from '../components/auth/AuthForm.vue'
+import GoogleButton from '../components/auth/GoogleButton.vue'
+import VerifyEmailPanel from '../components/auth/VerifyEmailPanel.vue'
 
-const { state, login, register, navigate } = useKalaFokus();
+const router = useRouter()
+const {
+  state,
+  needsVerification,
+  register: registerUser,
+  login: loginUser,
+  loginWithGoogle,
+  resendVerification,
+  refreshUser,
+  logout,
+  getErrorMessage
+} = useAuth()
 
-const isRegister = ref(false);
-const loginEmail = ref('nadia@kalafokus.id');
-const loginPassword = ref('kalafokus2026');
+const mode = ref('login') // 'login' | 'register'
+const loading = ref(false)
+const error = ref('')
+const info = ref('')
 
+// Jeda kirim ulang email supaya tidak kena "too-many-requests"
+const cooldown = ref(0)
+let timer = null
+const startCooldown = () => {
+  cooldown.value = 60
+  clearInterval(timer)
+  timer = setInterval(() => {
+    cooldown.value -= 1
+    if (cooldown.value <= 0) clearInterval(timer)
+  }, 1000)
+}
+onUnmounted(() => clearInterval(timer))
 
-const regForm = reactive({
-  name: '',
-  email: '',
-  password: '',
-  profile: 'balanced_explorer',
-  reelsLimit: 30
-});
+const goHome = () => router.replace({ name: 'dashboard' })
 
-function handleLogin() {
-  if (login) {
-    login({ email: loginEmail.value, password: loginPassword.value });
-  } else {
-    state.user.email = loginEmail.value;
-    state.isAuthenticated = true;
-    navigate('dashboard');
+const clearMessages = () => {
+  error.value = ''
+  info.value = ''
+}
+
+const switchMode = (m) => {
+  mode.value = m
+  clearMessages()
+}
+
+// Satu handler untuk login & register, dibedakan oleh `mode`
+const handleSubmit = async (payload) => {
+  clearMessages()
+  loading.value = true
+  try {
+    if (mode.value === 'register') {
+      await registerUser(payload)
+      startCooldown()
+      // needsVerification jadi true -> panel verifikasi muncul otomatis
+    } else {
+      const verified = await loginUser(payload)
+      if (verified) goHome()
+    }
+  } catch (e) {
+    error.value = getErrorMessage(e)
+  } finally {
+    loading.value = false
   }
 }
 
-function handleRegister() {
-  if (register) {
-    register({ ...regForm });
-  } else {
-    state.user.name = regForm.name;
-    state.user.email = regForm.email;
-    state.user.profile = regForm.profile;
-    state.user.reelsLimit = regForm.reelsLimit;
-    state.isAuthenticated = true;
-    navigate('dashboard');
+const handleGoogle = async () => {
+  clearMessages()
+  loading.value = true
+  try {
+    await loginWithGoogle()
+    goHome()
+  } catch (e) {
+    error.value = getErrorMessage(e)
+  } finally {
+    loading.value = false
   }
+}
+
+const handleCheckVerified = async () => {
+  clearMessages()
+  loading.value = true
+  try {
+    const ok = await refreshUser()
+    if (ok) goHome()
+    else error.value = 'Email belum terverifikasi. Klik link di email kami, lalu coba lagi.'
+  } catch (e) {
+    error.value = getErrorMessage(e)
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleResend = async () => {
+  if (cooldown.value > 0) return
+  clearMessages()
+  try {
+    await resendVerification()
+    info.value = 'Email verifikasi dikirim ulang.'
+    startCooldown()
+  } catch (e) {
+    error.value = getErrorMessage(e)
+  }
+}
+
+const handleSwitchAccount = async () => {
+  await logout()
+  switchMode('login')
 }
 </script>
+
+<template>
+  <div class="min-h-screen flex items-center justify-center bg-warmcream px-4 py-10">
+    <div class="w-full max-w-md bg-softwhite rounded-2xl shadow-lg p-8">
+      <h1 class="text-2xl font-bold text-mocha text-center">KalaFokus</h1>
+      <p class="text-sm text-mocha/70 text-center mt-1 mb-6">Cognitive Workspace</p>
+
+      <VerifyEmailPanel
+        v-if="needsVerification"
+        :email="state.user?.email"
+        :loading="loading"
+        :error="error"
+        :info="info"
+        :cooldown="cooldown"
+        @check="handleCheckVerified"
+        @resend="handleResend"
+        @switch-account="handleSwitchAccount"
+      />
+
+      <div v-else>
+        <div class="flex rounded-lg bg-warmcream p-1 mb-6">
+          <button
+            type="button"
+            @click="switchMode('login')"
+            :class="mode === 'login' ? 'bg-softwhite text-mocha shadow' : 'text-mocha/60'"
+            class="flex-1 py-2 rounded-md text-sm font-semibold transition"
+          >
+            Masuk
+          </button>
+          <button
+            type="button"
+            @click="switchMode('register')"
+            :class="mode === 'register' ? 'bg-softwhite text-mocha shadow' : 'text-mocha/60'"
+            class="flex-1 py-2 rounded-md text-sm font-semibold transition"
+          >
+            Daftar
+          </button>
+        </div>
+
+        <GoogleButton :disabled="loading" @click="handleGoogle" />
+
+        <div class="flex items-center gap-3 my-5">
+          <div class="flex-1 h-px bg-mocha/20"></div>
+          <span class="text-xs text-mocha/60">atau dengan email</span>
+          <div class="flex-1 h-px bg-mocha/20"></div>
+        </div>
+
+        <AuthForm :mode="mode" :loading="loading" :error="error" @submit="handleSubmit" />
+      </div>
+    </div>
+  </div>
+</template>
