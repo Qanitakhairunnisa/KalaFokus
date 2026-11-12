@@ -35,8 +35,8 @@
 </template>
 
 <script setup>
-import { useKalaFokus } from '../../composables/useKalaFokus';
-import BaseIcon from '../ui/BaseIcon.vue';
+import { reactive } from 'vue'
+import BaseIcon from '../ui/BaseIcon.vue'
 
-const { state } = useKalaFokus();
+const state = window.__kalafokus || reactive({ isDetoxModalOpen: false })
 </script>

@@ -73,22 +73,37 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useKalaFokus } from '../composables/useKalaFokus';
-import BaseIcon from '../components/ui/BaseIcon.vue';
+import { ref, computed, reactive } from 'vue'
+import BaseIcon from '../components/ui/BaseIcon.vue'
 
-const { state, focusMinutesToday, brainfallMinutesToday } = useKalaFokus();
-const apiKey = ref('');
+const state = window.__kalafokus || reactive({
+  settings: { reelsLimit: 30 },
+  ideas: [],
+  sessions: [],
+  brainfallLogs: [],
+  aiEvaluations: []
+})
 
-const latestEval = computed(() => state.aiEvaluations[0]);
+const apiKey = ref('')
+
+const focusMinutesToday = computed(() =>
+  state.sessions.reduce((acc, s) => acc + Number(s.duration || 0), 0)
+)
+
+const brainfallMinutesToday = computed(() =>
+  state.brainfallLogs.reduce((acc, log) => acc + Number(log.duration || 0), 0)
+)
+
+const latestEval = computed(() => state.aiEvaluations[0])
 
 function generateEvaluation() {
+  const limit = Number(state.settings?.reelsLimit) || 30
   state.aiEvaluations.unshift({
     id: Date.now(),
     date: 'Evaluasi Real-Time Baru Saja',
-    status: brainfallMinutesToday.value > state.user.reelsLimit ? 'Waspada Kelelahan Dopamin' : 'Fokus Terjaga Baik',
+    status: brainfallMinutesToday.value > limit ? 'Waspada Kelelahan Dopamin' : 'Fokus Terjaga Baik',
     summary: `Total fokus hari ini mencapai ${focusMinutesToday.value} menit dengan ${state.ideas.length} ide impulsif berhasil diamankan di Parkir Ide, serta konsumsi Reels ${brainfallMinutesToday.value} menit.`,
     recommendation: 'Pertahankan sesi kerja dengan metode Pomodoro dan pastikan Anda mempromosikan ide yang relevan menjadi tugas terjadwal.'
-  });
+  })
 }
 </script>

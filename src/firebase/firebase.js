@@ -1,4 +1,4 @@
-// src/firebase.js
+// src/firebase/firebase.js
 import { initializeApp } from 'firebase/app'
 import { getAnalytics, isSupported } from 'firebase/analytics'
 import { getAuth } from 'firebase/auth'
@@ -15,11 +15,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig)
 
-// Auth: ini yang tadinya hilang, makanya `import { auth } from '../firebase'` gagal
 export const auth = getAuth(app)
-auth.languageCode = 'id' // email verifikasi berbahasa Indonesia
+auth.languageCode = 'id'
 
-// Analytics hanya jalan di browser yang mendukung (aman saat dev/SSR)
 isSupported().then((ok) => {
   if (ok) getAnalytics(app)
 })

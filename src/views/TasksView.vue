@@ -70,63 +70,62 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
-import { useKalaFokus } from '../composables/useKalaFokus';
-import SegmentedControl from '../components/ui/SegmentedControl.vue';
-import BaseIcon from '../components/ui/BaseIcon.vue';
+import { ref, reactive, computed } from 'vue'
+import SegmentedControl from '../components/ui/SegmentedControl.vue'
+import BaseIcon from '../components/ui/BaseIcon.vue'
 
-const { state } = useKalaFokus();
+const state = window.__kalafokus || reactive({ tasks: [] })
 
-const activeFilter = ref('all');
-const editingId = ref(null);
+const activeFilter = ref('all')
+const editingId = ref(null)
 const filterOptions = [
   { label: 'Semua', value: 'all' },
   { label: 'Aktif', value: 'pending' },
   { label: 'Selesai', value: 'completed' }
-];
+]
 
 const form = reactive({
   title: '',
-  deadline: '2026-11-06T12:00',
+  deadline: '2026-11-13T12:00',
   load: 'medium',
   pomodoros: 2,
   category: 'Riset & Penulisan'
-});
+})
 
 const filteredTasks = computed(() => {
-  if (activeFilter.value === 'pending') return state.tasks.filter(t => !t.completed);
-  if (activeFilter.value === 'completed') return state.tasks.filter(t => t.completed);
-  return state.tasks;
-});
+  if (activeFilter.value === 'pending') return state.tasks.filter((t) => !t.completed)
+  if (activeFilter.value === 'completed') return state.tasks.filter((t) => t.completed)
+  return state.tasks
+})
 
 function saveTask() {
   if (editingId.value) {
-    const idx = state.tasks.findIndex(t => t.id === editingId.value);
-    if (idx !== -1) Object.assign(state.tasks[idx], { ...form });
-    cancelEdit();
+    const idx = state.tasks.findIndex((t) => t.id === editingId.value)
+    if (idx !== -1) Object.assign(state.tasks[idx], { ...form })
+    cancelEdit()
   } else {
-    state.tasks.push({ id: Date.now(), ...form, completed: false });
-    form.title = '';
+    state.tasks.push({ id: Date.now(), ...form, completed: false })
+    form.title = ''
   }
 }
 
 function startEdit(task) {
-  editingId.value = task.id;
+  editingId.value = task.id
   Object.assign(form, {
     title: task.title,
     deadline: task.deadline,
     load: task.load,
     pomodoros: task.pomodoros,
     category: task.category
-  });
+  })
 }
 
 function cancelEdit() {
-  editingId.value = null;
-  form.title = '';
+  editingId.value = null
+  form.title = ''
 }
 
 function deleteTask(id) {
-  state.tasks = state.tasks.filter(t => t.id !== id);
+  state.tasks = state.tasks.filter((t) => t.id !== id)
 }
 </script>

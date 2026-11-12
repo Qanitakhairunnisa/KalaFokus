@@ -1,6 +1,6 @@
 // src/composables/useAuth.js
 import { reactive, computed } from 'vue'
-import { auth } from '../firebase'
+import { auth } from '../firebase/firebase'
 import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
@@ -15,7 +15,7 @@ import {
 
 // State dibuat di luar fungsi supaya satu untuk seluruh aplikasi (singleton)
 const state = reactive({
-  user: null,     // { uid, displayName, email, photoURL, emailVerified } atau null
+  user: null, // { uid, displayName, email, photoURL, emailVerified } atau null
   loading: true
 })
 
@@ -50,7 +50,6 @@ const register = async ({ name, email, password }) => {
   const cred = await createUserWithEmailAndPassword(auth, email, password)
   if (name) await updateProfile(cred.user, { displayName: name })
   state.user = snapshot(auth.currentUser)
-  // Email verifikasi langsung terkirim saat Daftar ditekan
   await sendEmailVerification(cred.user, verificationSettings())
 }
 
@@ -76,7 +75,7 @@ const resendVerification = async () => {
 const refreshUser = async () => {
   if (!auth.currentUser) return false
   await reload(auth.currentUser)
-  await auth.currentUser.getIdToken(true) // segarkan token (penting nanti untuk backend PHP)
+  await auth.currentUser.getIdToken(true)
   state.user = snapshot(auth.currentUser)
   return state.user.emailVerified
 }

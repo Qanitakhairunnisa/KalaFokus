@@ -1,6 +1,5 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
-import { useKalaFokus } from '../composables/useKalaFokus'
 import { useAuth } from '../composables/useAuth'
 
 import DashboardView from '../views/DashboardView.vue'
@@ -59,19 +58,10 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  const { state } = useKalaFokus()
   const { authReady, isAuthenticated } = useAuth()
 
   // Tunggu Firebase selesai memulihkan sesi (kalau tidak, refresh halaman selalu terlempar ke /auth)
   await authReady
-
-  // Sinkronkan state.currentView dengan route yang sedang aktif
-  if (to.meta.viewKey) {
-    state.currentView = to.meta.viewKey
-  }
-
-  // Jaga agar kode lama yang membaca state.isAuthenticated tetap benar
-  state.isAuthenticated = isAuthenticated.value
 
   if (to.meta.requiresAuth && !isAuthenticated.value) {
     return { name: 'auth' }

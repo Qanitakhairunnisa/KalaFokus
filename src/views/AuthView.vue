@@ -116,52 +116,46 @@ const handleSwitchAccount = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-warmcream px-4 py-10">
-    <div class="w-full max-w-md bg-softwhite rounded-2xl shadow-lg p-8">
-      <h1 class="text-2xl font-bold text-mocha text-center">KalaFokus</h1>
-      <p class="text-sm text-mocha/70 text-center mt-1 mb-6">Cognitive Workspace</p>
+  <div class="w-full min-h-screen flex items-center justify-center bg-warmcream px-4 py-10">
+    <div class="w-full max-w-6xl bg-softwhite rounded-3xl shadow-xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+      <!-- Kolom Kiri: Gambar Ilustrasi -->
+      <div class="hidden md:block relative bg-mocha-800">
+        <img src="/time-to-lock-in.jpg" alt="time-to-lock-in" class="w-full h-full object-cover" />
+      </div>
 
-      <VerifyEmailPanel
-        v-if="needsVerification"
-        :email="state.user?.email"
-        :loading="loading"
-        :error="error"
-        :info="info"
-        :cooldown="cooldown"
-        @check="handleCheckVerified"
-        @resend="handleResend"
-        @switch-account="handleSwitchAccount"
-      />
+      <!-- Kolom Kanan: Form Autentikasi -->
+      <div class="w-full p-8 sm:p-10 flex flex-col justify-center">
+        <h1 class="text-2xl font-bold text-mocha text-center">KalaFokus</h1>
+        <p class="text-sm text-mocha/70 text-center mt-1 mb-6">Cognitive Workspace</p>
 
-      <div v-else>
-        <div class="flex rounded-lg bg-warmcream p-1 mb-6">
-          <button
-            type="button"
-            @click="switchMode('login')"
-            :class="mode === 'login' ? 'bg-softwhite text-mocha shadow' : 'text-mocha/60'"
-            class="flex-1 py-2 rounded-md text-sm font-semibold transition"
-          >
-            Masuk
-          </button>
-          <button
-            type="button"
-            @click="switchMode('register')"
-            :class="mode === 'register' ? 'bg-softwhite text-mocha shadow' : 'text-mocha/60'"
-            class="flex-1 py-2 rounded-md text-sm font-semibold transition"
-          >
-            Daftar
-          </button>
+        <VerifyEmailPanel v-if="needsVerification" :email="state.user?.email" :loading="loading" :error="error"
+          :info="info" :cooldown="cooldown" @check="handleCheckVerified" @resend="handleResend"
+          @switch-account="handleSwitchAccount" />
+
+        <div v-else>
+          <div class="flex rounded-lg bg-warmcream p-1 mb-6">
+            <button type="button" @click="switchMode('login')"
+              :class="mode === 'login' ? 'bg-softwhite text-mocha shadow' : 'text-mocha/60'"
+              class="flex-1 py-2 rounded-md text-sm font-semibold transition cursor-pointer">
+              Masuk
+            </button>
+            <button type="button" @click="switchMode('register')"
+              :class="mode === 'register' ? 'bg-softwhite text-mocha shadow' : 'text-mocha/60'"
+              class="flex-1 py-2 rounded-md text-sm font-semibold transition cursor-pointer">
+              Daftar
+            </button>
+          </div>
+
+          <GoogleButton :disabled="loading" @click="handleGoogle" />
+
+          <div class="flex items-center gap-3 my-5">
+            <div class="flex-1 h-px bg-mocha/20"></div>
+            <span class="text-xs text-mocha/60">atau dengan email</span>
+            <div class="flex-1 h-px bg-mocha/20"></div>
+          </div>
+
+          <AuthForm :mode="mode" :loading="loading" :error="error" @submit="handleSubmit" />
         </div>
-
-        <GoogleButton :disabled="loading" @click="handleGoogle" />
-
-        <div class="flex items-center gap-3 my-5">
-          <div class="flex-1 h-px bg-mocha/20"></div>
-          <span class="text-xs text-mocha/60">atau dengan email</span>
-          <div class="flex-1 h-px bg-mocha/20"></div>
-        </div>
-
-        <AuthForm :mode="mode" :loading="loading" :error="error" @submit="handleSubmit" />
       </div>
     </div>
   </div>

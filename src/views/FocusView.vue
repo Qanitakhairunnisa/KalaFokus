@@ -32,7 +32,7 @@
       <!-- Kanan: Timer + Track Record -->
       <div class="focus-col">
         <div class="focus-card focus-timer">
-          <SegmentedControl v-model="selectedMode" variant="blue" button-class="timer-mode-btn" :options="timerModes"
+          <SegmentedControl v-model="state.timer.mode" variant="blue" button-class="timer-mode-btn" :options="timerModes"
             @update:model-value="changeMode" />
 
           <div class="focus-ring">
@@ -42,16 +42,16 @@
                 stroke-linecap="round" stroke-dasharray="603.18" :stroke-dashoffset="dashOffset" />
             </svg>
             <div class="focus-ring__center">
-              <span class="focus-ring__status">{{ isRunning ? 'Fokus' : 'Siap' }}</span>
+              <span class="focus-ring__status">{{ state.timer.isRunning ? 'Fokus' : 'Siap' }}</span>
               <div class="focus-ring__time">{{ formattedTime }}</div>
               <span class="focus-ring__idea" title="Pikiran yang diparkir selama sesi">
                 <BaseIcon name="message-circle" with-margin />
-                <strong>{{ sessionDistractions }}</strong>
+                <strong>{{ state.timer.distractions }}</strong>
               </span>
             </div>
           </div>
 
-          <select v-model="selectedTaskTitle" class="focus-pill" aria-label="Tugas yang difokuskan">
+          <select v-model="state.timer.selectedTaskTitle" class="focus-pill" aria-label="Tugas yang difokuskan">
             <option value="Sesi Fokus Mandiri">Tanpa tugas</option>
             <option v-for="t in pendingTasks" :key="t.id" :value="t.title">{{ t.title }}</option>
           </select>
@@ -60,7 +60,7 @@
             <button type="button" class="focus-ctl" aria-label="Reset" @click="resetTimer">
               <BaseIcon name="rotate-ccw" />
             </button>
-            <button v-if="!isRunning" type="button" class="dash-btn dash-btn--primary focus-main" @click="startTimer">
+            <button v-if="!state.timer.isRunning" type="button" class="dash-btn dash-btn--primary focus-main" @click="startTimer">
               <BaseIcon name="play" with-margin />Mulai
             </button>
             <button v-else type="button" class="dash-btn dash-btn--primary focus-main" @click="pauseTimer">
@@ -72,13 +72,13 @@
           </div>
 
           <div class="focus-meta">
-            <select v-model="sessionMood" class="task-input" aria-label="Kondisi">
+            <select v-model="state.timer.mood" class="task-input" aria-label="Kondisi">
               <option value="calm">Tenang</option>
               <option value="energized">Berenergi</option>
               <option value="tired">Lelah</option>
               <option value="overwhelmed">Kewalahan</option>
             </select>
-            <input v-model="sessionNote" type="text" class="task-input" placeholder="Catatan sesi" />
+            <input v-model="state.timer.note" type="text" class="task-input" placeholder="Catatan sesi" />
           </div>
         </div>
       </div>
@@ -114,92 +114,115 @@
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted } from 'vue';
-import { useKalaFokus } from '../composables/useKalaFokus';
-import SegmentedControl from '../components/ui/SegmentedControl.vue';
-import BasePanel from '../components/ui/BasePanel.vue';
-import BaseIcon from '../components/ui/BaseIcon.vue';
+import { ref, computed, reactive } from 'vue'
+import SegmentedControl from '../components/ui/SegmentedControl.vue'
+import BasePanel from '../components/ui/BasePanel.vue'
+import BaseIcon from '../components/ui/BaseIcon.vue'
 
-const { state, pendingTasks, focusMinutesToday, addIdea } = useKalaFokus();
+const state = window.__kalafokus || reactive({
+  ideas: [],
+  tasks: [],
+  sessions: [],
+  timer: {
+    isRunning: false,
+    mode: '25',
+    duration: 25 * 60,
+    remaining: 25 * 60,
+    distractions: 0,
+    selectedTaskTitle: 'Sesi Fokus Mandiri',
+    mood: 'calm',
+    note: '',
+    intervalId: null
+  }
+})
 
 const timerModes = [
   { label: 'Pomodoro', value: '25' },
   { label: 'Deep Work', value: '50' },
   { label: 'Sprint', value: '15' }
-];
+]
 
-const selectedMode = ref('25');
-const totalSeconds = ref(25 * 60);
-const remainingSeconds = ref(25 * 60);
-const isRunning = ref(false);
-const sessionDistractions = ref(0);
-const selectedTaskTitle = ref('Sesi Fokus Mandiri');
-const sessionMood = ref('calm');
-const sessionNote = ref('');
-const inlineIdeaText = ref('');
-const inlineIdeaTag = ref('ide_kreatif');
-let intervalId = null;
+const inlineIdeaText = ref('')
+const inlineIdeaTag = ref('ide_kreatif')
+
+const pendingTasks = computed(() => state.tasks.filter((t) => !t.completed))
+
+const focusMinutesToday = computed(() =>
+  state.sessions.reduce((acc, s) => acc + Number(s.duration || 0), 0)
+)
 
 const formattedTime = computed(() => {
-  const m = String(Math.floor(remainingSeconds.value / 60)).padStart(2, '0');
-  const s = String(remainingSeconds.value % 60).padStart(2, '0');
-  return `${m}:${s}`;
-});
+  const s = Math.max(0, Number(state.timer.remaining) || 0)
+  const m = String(Math.floor(s / 60)).padStart(2, '0')
+  const sec = String(s % 60).padStart(2, '0')
+  return `${m}:${sec}`
+})
 
 const dashOffset = computed(() => {
-  const circumference = 603.18;
-  const progress = remainingSeconds.value / totalSeconds.value;
-  return circumference * (1 - progress);
-});
+  const circumference = 603.18
+  const total = state.timer.duration || 1500
+  const progress = state.timer.remaining / total
+  return circumference * (1 - progress)
+})
 
 function changeMode(mins) {
-  pauseTimer();
-  totalSeconds.value = Number(mins) * 60;
-  remainingSeconds.value = totalSeconds.value;
+  pauseTimer()
+  state.timer.mode = String(mins)
+  state.timer.duration = Number(mins) * 60
+  state.timer.remaining = state.timer.duration
 }
 
 function startTimer() {
-  if (isRunning.value) return;
-  isRunning.value = true;
-  intervalId = setInterval(() => {
-    if (remainingSeconds.value > 0) {
-      remainingSeconds.value--;
+  if (state.timer.isRunning) return
+  state.timer.isRunning = true
+  clearInterval(state.timer.intervalId)
+  state.timer.intervalId = setInterval(() => {
+    if (state.timer.remaining > 0) {
+      state.timer.remaining -= 1
     } else {
-      completeSession();
+      completeSession()
     }
-  }, 1000);
+  }, 1000)
 }
 
 function pauseTimer() {
-  isRunning.value = false;
-  clearInterval(intervalId);
+  state.timer.isRunning = false
+  clearInterval(state.timer.intervalId)
 }
 
 function resetTimer() {
-  pauseTimer();
-  remainingSeconds.value = totalSeconds.value;
+  pauseTimer()
+  state.timer.remaining = state.timer.duration
 }
 
 function completeSession() {
-  pauseTimer();
-  const mins = Math.round(totalSeconds.value / 60);
+  pauseTimer()
+  const mins = Math.round(state.timer.duration / 60)
   state.sessions.unshift({
     id: Date.now(),
     time: new Date().toTimeString().slice(0, 5),
-    taskTitle: selectedTaskTitle.value,
+    taskTitle: state.timer.selectedTaskTitle,
     duration: mins,
-    score: Math.max(70, 100 - sessionDistractions.value * 5),
-    mood: sessionMood.value
-  });
-  sessionDistractions.value = 0;
-  resetTimer();
+    score: Math.max(70, 100 - (state.timer.distractions || 0) * 5),
+    mood: state.timer.mood
+  })
+  state.timer.distractions = 0
+  state.timer.note = ''
+  resetTimer()
 }
 
 function handleInlineIdea() {
-  addIdea(inlineIdeaText.value, inlineIdeaTag.value);
-  inlineIdeaText.value = '';
-  if (isRunning.value) sessionDistractions.value++;
+  const text = inlineIdeaText.value.trim()
+  if (!text) return
+  state.ideas.unshift({
+    id: Date.now(),
+    text,
+    tag: inlineIdeaTag.value,
+    createdAt: new Date().toTimeString().slice(0, 5)
+  })
+  inlineIdeaText.value = ''
+  if (state.timer.isRunning) {
+    state.timer.distractions += 1
+  }
 }
-
-onUnmounted(() => clearInterval(intervalId));
 </script>

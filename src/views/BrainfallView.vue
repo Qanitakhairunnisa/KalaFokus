@@ -23,7 +23,7 @@
           <label class="block text-[11px] font-semibold uppercase tracking-wider text-mocha-500">Batas Aman Harian</label>
           <div class="flex items-center gap-2 mt-2">
             <input
-              v-model.number="state.user.reelsLimit"
+              v-model.number="state.settings.reelsLimit"
               type="number"
               min="5"
               max="180"
@@ -39,7 +39,7 @@
           <div>
             <span class="text-xs font-semibold text-mocha-800">Hari Ini: </span>
             <span class="font-serif text-xl font-semibold text-mocha-900">
-              {{ brainfallMinutesToday }} / {{ state.user.reelsLimit }} Menit ({{ brainfallPercentage }}%)
+              {{ brainfallMinutesToday }} / {{ state.settings.reelsLimit }} Menit ({{ brainfallPercentage }}%)
             </span>
           </div>
           <span class="text-xs text-mocha-600">~{{ Math.round(brainfallMinutesToday * 2.2) }} video</span>
@@ -156,19 +156,50 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
-import { useKalaFokus } from '../composables/useKalaFokus';
-import BaseIcon from '../components/ui/BaseIcon.vue';
-import ProgressBar from '../components/ui/ProgressBar.vue';
+import { reactive, computed } from 'vue'
+import BaseIcon from '../components/ui/BaseIcon.vue'
+import ProgressBar from '../components/ui/ProgressBar.vue'
 
-const { state, brainfallMinutesToday, brainfallPercentage, isBrainfallOverlimit, logBrainfall } = useKalaFokus();
+const state = window.__kalafokus || reactive({
+  isDetoxModalOpen: false,
+  settings: { reelsLimit: 30 },
+  brainfallLogs: []
+})
+
+const brainfallMinutesToday = computed(() =>
+  state.brainfallLogs.reduce((acc, log) => acc + Number(log.duration || 0), 0)
+)
+
+const brainfallPercentage = computed(() => {
+  const limit = Number(state.settings?.reelsLimit) || 30
+  return Math.min(100, Math.round((brainfallMinutesToday.value / limit) * 100))
+})
+
+const isBrainfallOverlimit = computed(() => {
+  const limit = Number(state.settings?.reelsLimit) || 30
+  return brainfallMinutesToday.value >= limit
+})
 
 const form = reactive({
   platform: 'Instagram Reels',
   duration: 10,
   trigger: 'istirahat_kebablasan',
   aftereffect: 'biasa_saja'
-});
+})
+
+function logBrainfall({ platform, duration, trigger, aftereffect }) {
+  state.brainfallLogs.unshift({
+    id: Date.now(),
+    platform,
+    duration: Number(duration),
+    trigger,
+    aftereffect,
+    time: new Date().toTimeString().slice(0, 5)
+  })
+  if (brainfallMinutesToday.value >= (Number(state.settings?.reelsLimit) || 30)) {
+    state.isDetoxModalOpen = true
+  }
+}
 
 function quickLog(mins) {
   logBrainfall({
@@ -176,10 +207,10 @@ function quickLog(mins) {
     duration: mins,
     trigger: 'istirahat_kebablasan',
     aftereffect: 'biasa_saja'
-  });
+  })
 }
 
 function submitFormLog() {
-  logBrainfall({ ...form });
+  logBrainfall({ ...form })
 }
 </script>

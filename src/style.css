@@ -1,13 +1,44 @@
 @import "tailwindcss";
 
+@theme {
+  --font-serif: 'Lora', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+  --color-softwhite: #FFFFFF;
+
+  --color-warmcream: #E8F1FB;
+  --color-warmcream-50: #F7FAFE;
+  --color-warmcream-100: #E8F1FB;
+  --color-warmcream-200: #D6E6F8;
+  --color-warmcream-300: #BFD6F0;
+
+  --color-mocha: #1B3556;
+  --color-mocha-50: #F2F7FD;
+  --color-mocha-100: #DCE8F6;
+  --color-mocha-300: #9DB6D3;
+  --color-mocha-400: #7F98B5;
+  --color-mocha-500: #6584A8;
+  --color-mocha-600: #4A6A8F;
+  --color-mocha-700: #35557D;
+  --color-mocha-800: #2F6AAE;
+  --color-mocha-900: #1B3556;
+
+  --color-sage: #4F9BD9;
+  --color-sage-50: #EEF6FD;
+  --color-sage-100: #D6E8F8;
+  --color-sage-600: #4F9BD9;
+  --color-sage-700: #2F76B8;
+
+  --color-terracotta: #D4505F;
+  --color-terracotta-50: #FFF1F2;
+  --color-terracotta-100: #FFE0E3;
+  --color-terracotta-500: #E5707E;
+  --color-terracotta-600: #D4505F;
+  --color-terracotta-700: #B23A49;
+}
+
 /**
  * KALAFOKUS — Stylesheet Editorial Kognitif & Distraction-Free UI
- * Palet Utama:
- *  - Soft White  : #FFFFFF
- *  - Warm Cream  : #E8F1FB / #EAE3D2
- *  - Deep Mocha  : #2F6AAE / #4A6A8F / #1B3556
- *  - Calm Sage   : #4F9BD9
- *  - Amber Alert : #D4505F
  */
 
 :root {
@@ -28,10 +59,50 @@ body {
   color: var(--mocha-deep);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  margin: 0;
 }
 
 .font-editorial {
   font-family: 'Lora', Georgia, serif;
+}
+
+/* Struktur Layout Aplikasi Utama (App.vue) */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  background-color: var(--bg-soft-white);
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content {
+  flex: 1;
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 6rem;
+}
+
+@media (min-width: 1024px) {
+  .app-content {
+    padding: 1.75rem 2rem 3rem;
+  }
+}
+
+.dash-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #E8F1FB;
+  color: #2F6AAE;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 /* Transisi halus antar-halaman SPA */

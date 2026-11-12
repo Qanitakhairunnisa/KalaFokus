@@ -80,16 +80,48 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useKalaFokus } from '../../composables/useKalaFokus';
-import BaseIcon from '../ui/BaseIcon.vue';
+import { ref, reactive } from 'vue'
+import BaseIcon from '../ui/BaseIcon.vue'
 
-const { state, addIdea, removeIdea, promoteIdeaToTask } = useKalaFokus();
-const ideaText = ref('');
-const ideaTag = ref('ide_kreatif');
+const state = window.__kalafokus || reactive({
+  isIdeaDrawerOpen: false,
+  ideas: [],
+  tasks: [],
+  timer: { isRunning: false, distractions: 0 }
+})
+
+const ideaText = ref('')
+const ideaTag = ref('ide_kreatif')
 
 function handleSubmit() {
-  addIdea(ideaText.value, ideaTag.value);
-  ideaText.value = '';
+  const text = ideaText.value.trim()
+  if (!text) return
+  state.ideas.unshift({
+    id: Date.now(),
+    text,
+    tag: ideaTag.value,
+    createdAt: new Date().toTimeString().slice(0, 5)
+  })
+  if (state.timer?.isRunning) {
+    state.timer.distractions = (state.timer.distractions || 0) + 1
+  }
+  ideaText.value = ''
+}
+
+function removeIdea(id) {
+  state.ideas = state.ideas.filter((i) => i.id !== id)
+}
+
+function promoteIdeaToTask(idea) {
+  state.tasks.push({
+    id: Date.now(),
+    title: idea.text,
+    deadline: new Date(Date.now() + 86400000).toISOString().slice(0, 16),
+    load: 'medium',
+    pomodoros: 1,
+    category: 'Hasil Parkir Ide',
+    completed: false
+  })
+  removeIdea(idea.id)
 }
 </script>
