@@ -32,8 +32,7 @@
       <!-- Kanan: Stopwatch + Track Record -->
       <div class="focus-col">
         <div class="focus-card focus-timer">
-          <SegmentedControl v-model="state.timer.mode" variant="blue" button-class="timer-mode-btn" :options="timerModes"
-            @update:model-value="changeMode" />
+          <span class="dash-chip">🍅 Pomodoro · 25 menit</span>
 
           <div class="focus-ring">
             <svg viewBox="0 0 220 220" aria-hidden="true">
@@ -59,10 +58,7 @@
 
           <!-- Tidak ada tombol jeda: sekali mulai, hanya bisa dihentikan -->
           <div class="focus-controls">
-            <button type="button" class="focus-ctl" aria-label="Reset" @click="resetTimer">
-              <BaseIcon name="rotate-ccw" />
-            </button>
-            <button v-if="!state.timer.isRunning" type="button" class="dash-btn dash-btn--primary focus-main" @click="startTimer">
+            <button v-if="!state.timer.isRunning" type="button" class="dash-btn dash-btn--primary focus-main" @click="start">
               <BaseIcon name="play" with-margin />Mulai
             </button>
             <button v-else type="button" class="dash-btn focus-main focus-stop" @click="stop">
@@ -128,98 +124,32 @@
 </style>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
-import SegmentedControl from '../components/ui/SegmentedControl.vue'
+import { ref, computed } from 'vue'
 import BasePanel from '../components/ui/BasePanel.vue'
 import BaseIcon from '../components/ui/BaseIcon.vue'
+import { POMODORO_SECONDS, useFocusTimer } from '../composables/useFocusTimer'
+import { formatWhen, nowTime, toDateKey, useAppState } from '../composables/useAppState'
 
-const state = window.__kalafokus || reactive({
-  ideas: [],
-  tasks: [],
-  sessions: [],
-  timer: {
-    isRunning: false,
-    mode: '25',
-    duration: 25 * 60,
-    remaining: 25 * 60,
-    distractions: 0,
-    selectedTaskTitle: 'Sesi Fokus Mandiri',
-    mood: 'calm',
-    note: '',
-    intervalId: null
-  }
-})
-
-const timerModes = [
-  { label: 'Pomodoro', value: '25' },
-  { label: 'Deep Work', value: '50' },
-  { label: 'Sprint', value: '15' }
-]
+const { start, stop } = useFocusTimer()
+const { state, pendingTasks, focusMinutesToday, taskTitle } = useAppState()
 
 const inlineIdeaText = ref('')
 const inlineIdeaTag = ref('ide_kreatif')
 
 const formattedTime = computed(() => {
-  const totalSec = Math.max(0, Number(state.timer.elapsed) || 0)
-  const h = Math.floor(totalSec / 3600)
-  const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0')
-  const s = String(totalSec % 60).padStart(2, '0')
-  return h > 0 ? `${String(h).padStart(2, '0')}:${m}:${s}` : `${m}:${s}`
+  const totalSec = Math.max(0, Number(state.timer.remaining) || 0)
+  const minutes = String(Math.floor(totalSec / 60)).padStart(2, '0')
+  const seconds = String(totalSec % 60).padStart(2, '0')
+  return `${minutes}:${seconds}`
 })
 
 // Lingkaran progres berputar penuh setiap 60 detik
 const dashOffset = computed(() => {
   const circumference = 603.18
-  const total = state.timer.duration || 1500
+  const total = state.timer.duration || POMODORO_SECONDS
   const progress = state.timer.remaining / total
   return circumference * (1 - progress)
 })
-
-function changeMode(mins) {
-  pauseTimer()
-  state.timer.mode = String(mins)
-  state.timer.duration = Number(mins) * 60
-  state.timer.remaining = state.timer.duration
-}
-
-function startTimer() {
-  if (state.timer.isRunning) return
-  state.timer.isRunning = true
-  clearInterval(state.timer.intervalId)
-  state.timer.intervalId = setInterval(() => {
-    if (state.timer.remaining > 0) {
-      state.timer.remaining -= 1
-    } else {
-      completeSession()
-    }
-  }, 1000)
-}
-
-function pauseTimer() {
-  state.timer.isRunning = false
-  clearInterval(state.timer.intervalId)
-}
-
-function resetTimer() {
-  pauseTimer()
-  state.timer.remaining = state.timer.duration
-}
-
-function completeSession() {
-  pauseTimer()
-  const mins = Math.round(state.timer.duration / 60)
-  state.sessions.unshift({
-    id: Date.now(),
-    time: new Date().toTimeString().slice(0, 5),
-    taskTitle: state.timer.selectedTaskTitle,
-    duration: mins,
-    score: Math.max(70, 100 - (state.timer.distractions || 0) * 5),
-    mood: state.timer.mood
-  })
-  state.timer.distractions = 0
-  state.timer.note = ''
-  resetTimer()
-}
 
 function handleInlineIdea() {
   const text = inlineIdeaText.value.trim()
