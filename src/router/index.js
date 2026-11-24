@@ -8,6 +8,7 @@ import TasksView from '../views/TasksView.vue'
 import BrainfallView from '../views/BrainfallView.vue'
 import AiInsightView from '../views/AiInsightView.vue'
 import AuthView from '../views/AuthView.vue'
+import ProfileView from '../views/ProfileView.vue'
 
 const routes = [
   {
@@ -45,6 +46,12 @@ const routes = [
     name: 'ai-insight',
     component: AiInsightView,
     meta: { title: 'AI Insight', viewKey: 'ai-insight', requiresAuth: true }
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: ProfileView,
+    meta: { title: 'Profil Saya', viewKey: 'profile', requiresAuth: true }
   },
   {
     path: '/:pathMatch(.*)*',

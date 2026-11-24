@@ -2,10 +2,12 @@
 import { computed, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '../../composables/useAuth'
+import { useFocusTimer } from '../../composables/useFocusTimer'
 
 const route = useRoute()
 const router = useRouter()
 const { logout: authLogout } = useAuth()
+const { cancel: cancelTimer } = useFocusTimer()
 
 const appState = window.__kalafokus || reactive({
   isIdeaDrawerOpen: false,
@@ -29,10 +31,7 @@ const navItems = [
 ]
 
 async function handleLogout() {
-  if (appState.timer?.intervalId) {
-    clearInterval(appState.timer.intervalId)
-    appState.timer.isRunning = false
-  }
+  cancelTimer()
   await authLogout()
   router.replace({ name: 'auth' })
 }

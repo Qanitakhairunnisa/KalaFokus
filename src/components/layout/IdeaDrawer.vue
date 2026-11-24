@@ -53,7 +53,7 @@
           >
             <div>
               <p class="text-xs font-medium text-mocha-900">{{ idea.text }}</p>
-              <span class="text-[10px] text-mocha-500">{{ idea.tag }} • {{ idea.createdAt }}</span>
+              <span class="text-[10px] text-mocha-500">{{ idea.tag }} • {{ formatWhen(idea) }}</span>
             </div>
             <div class="flex items-center gap-1 shrink-0">
               <button
@@ -80,15 +80,11 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 import BaseIcon from '../ui/BaseIcon.vue'
+import { defaultDeadline, formatWhen, nowTime, toDateKey, useAppState } from '../../composables/useAppState'
 
-const state = window.__kalafokus || reactive({
-  isIdeaDrawerOpen: false,
-  ideas: [],
-  tasks: [],
-  timer: { isRunning: false, distractions: 0 }
-})
+const { state } = useAppState()
 
 const ideaText = ref('')
 const ideaTag = ref('ide_kreatif')
@@ -100,7 +96,8 @@ function handleSubmit() {
     id: Date.now(),
     text,
     tag: ideaTag.value,
-    createdAt: new Date().toTimeString().slice(0, 5)
+    date: toDateKey(),
+    time: nowTime()
   })
   if (state.timer?.isRunning) {
     state.timer.distractions = (state.timer.distractions || 0) + 1
@@ -116,7 +113,7 @@ function promoteIdeaToTask(idea) {
   state.tasks.push({
     id: Date.now(),
     title: idea.text,
-    deadline: new Date(Date.now() + 86400000).toISOString().slice(0, 16),
+    deadline: defaultDeadline(),
     load: 'medium',
     pomodoros: 1,
     category: 'Hasil Parkir Ide',

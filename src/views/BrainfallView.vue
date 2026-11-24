@@ -139,7 +139,7 @@
         <h4 class="font-serif text-lg font-semibold text-mocha-900 mb-4">Riwayat Reels</h4>
         <div class="space-y-3">
           <div
-            v-for="item in state.brainfallLogs"
+            v-for="item in state.brainfallLogs.slice(0, 30)"
             :key="item.id"
             class="p-4 rounded-2xl bg-softwhite border border-warmcream-200 flex items-center justify-between"
           >
@@ -147,7 +147,7 @@
               <p class="text-xs font-semibold text-mocha-900">{{ item.platform }} ({{ item.duration }} mnt)</p>
               <span class="text-[11px] text-mocha-500">{{ item.trigger }} • {{ item.aftereffect }}</span>
             </div>
-            <span class="text-xs text-mocha-500">{{ item.time }}</span>
+            <span class="text-xs text-mocha-500">{{ formatWhen(item) }}</span>
           </div>
         </div>
       </div>
@@ -159,26 +159,17 @@
 import { reactive, computed } from 'vue'
 import BaseIcon from '../components/ui/BaseIcon.vue'
 import ProgressBar from '../components/ui/ProgressBar.vue'
+import { formatWhen, nowTime, toDateKey, useAppState } from '../composables/useAppState'
 
-const state = window.__kalafokus || reactive({
-  isDetoxModalOpen: false,
-  settings: { reelsLimit: 30 },
-  brainfallLogs: []
-})
+const { state, brainfallMinutesToday } = useAppState()
 
-const brainfallMinutesToday = computed(() =>
-  state.brainfallLogs.reduce((acc, log) => acc + Number(log.duration || 0), 0)
+const reelsLimit = computed(() => Number(state.settings?.reelsLimit) || 30)
+
+const brainfallPercentage = computed(() =>
+  Math.min(100, Math.round((brainfallMinutesToday.value / reelsLimit.value) * 100))
 )
 
-const brainfallPercentage = computed(() => {
-  const limit = Number(state.settings?.reelsLimit) || 30
-  return Math.min(100, Math.round((brainfallMinutesToday.value / limit) * 100))
-})
-
-const isBrainfallOverlimit = computed(() => {
-  const limit = Number(state.settings?.reelsLimit) || 30
-  return brainfallMinutesToday.value >= limit
-})
+const isBrainfallOverlimit = computed(() => brainfallMinutesToday.value >= reelsLimit.value)
 
 const form = reactive({
   platform: 'Instagram Reels',
@@ -194,9 +185,10 @@ function logBrainfall({ platform, duration, trigger, aftereffect }) {
     duration: Number(duration),
     trigger,
     aftereffect,
-    time: new Date().toTimeString().slice(0, 5)
+    date: toDateKey(),
+    time: nowTime()
   })
-  if (brainfallMinutesToday.value >= (Number(state.settings?.reelsLimit) || 30)) {
+  if (brainfallMinutesToday.value >= reelsLimit.value) {
     state.isDetoxModalOpen = true
   }
 }

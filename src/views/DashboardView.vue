@@ -40,7 +40,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="task in pendingTasks.slice(0, 4)" :key="task.id">
+              <tr v-for="task in priorityTasks" :key="task.id">
                 <td class="dash-cell-title font-medium">{{ task.title }}</td>
                 <td>{{ formatDeadline(task.deadline) }}</td>
                 <td><span>{{ task.load }}</span></td>
@@ -76,7 +76,7 @@
       </aside>
     </div>
 
-    <BasePanel title="Sesi Terbaru" panel-class="dash-panel dash-panel--wide">
+    <BasePanel title="Sesi Hari Ini" panel-class="dash-panel dash-panel--wide">
       <div class="dash-table-wrap">
         <table class="dash-table">
           <thead>
@@ -87,12 +87,12 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="session in state.sessions" :key="session.id">
-              <td class="dash-cell-title">{{ session.taskTitle }}</td>
+            <tr v-for="session in sessionsToday" :key="session.id">
+              <td class="dash-cell-title">{{ taskTitle(session.taskId, session.taskTitle) }}</td>
               <td>{{ session.duration }} mnt</td>
               <td>{{ session.score }}%</td>
             </tr>
-            <tr v-if="!state.sessions || state.sessions.length === 0">
+            <tr v-if="sessionsToday.length === 0">
               <td colspan="3" class="text-center py-4 text-xs opacity-60">
                 Belum ada riwayat sesi fokus hari ini.
               </td>
@@ -105,51 +105,35 @@
 </template>
 
 <script setup>
-import { computed, reactive } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
+import { formatDeadline, isToday, useAppState } from '../composables/useAppState'
 import StatCard from '../components/ui/StatCard.vue'
 import BasePanel from '../components/ui/BasePanel.vue'
 
 const router = useRouter()
 const { state: authState } = useAuth()
-
-const state = window.__kalafokus || reactive({
-  isIdeaDrawerOpen: false,
-  activeTaskId: null,
-  settings: { focusTarget: 120, reelsLimit: 30 },
-  tasks: [],
-  ideas: [],
-  sessions: [],
-  brainfallLogs: [],
-  timer: { selectedTaskTitle: 'Sesi Fokus Mandiri' }
-})
+const { state, pendingTasks, focusMinutesToday, brainfallMinutesToday, taskTitle } = useAppState()
 
 const firstName = computed(() => {
   const full = authState.user?.displayName || authState.user?.email?.split('@')[0] || 'Teman'
   return full.split(' ')[0]
 })
 
-const pendingTasks = computed(() => state.tasks.filter((t) => !t.completed))
-
-const focusMinutesToday = computed(() =>
-  state.sessions.reduce((acc, s) => acc + Number(s.duration || 0), 0)
+// Tugas prioritas = tenggat terdekat dulu
+const priorityTasks = computed(() =>
+  pendingTasks.value
+    .slice()
+    .sort((a, b) => String(a.deadline || '9999').localeCompare(String(b.deadline || '9999')))
+    .slice(0, 4)
 )
 
-const brainfallMinutesToday = computed(() =>
-  state.brainfallLogs.reduce((acc, l) => acc + Number(l.duration || 0), 0)
-)
-
-function formatDeadline(deadline) {
-  if (!deadline) return '-'
-  return deadline.replace('T', ' ')
-}
+const sessionsToday = computed(() => state.sessions.filter(isToday))
 
 function startFocusOnTask(task) {
   state.activeTaskId = task.id
-  if (state.timer) {
-    state.timer.selectedTaskTitle = task.title
-  }
+  if (!state.timer.isRunning) state.timer.selectedTaskId = task.id
   router.push('/focus')
 }
 </script>
