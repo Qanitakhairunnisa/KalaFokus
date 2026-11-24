@@ -153,3 +153,33 @@ function startFocusOnTask(task) {
   router.push('/focus')
 }
 </script>
+
+<style scoped>
+@media (max-width: 768px) {
+  .dash {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 1. Header sapaan & tombol tetap di paling atas */
+  .dash-top {
+    order: 1;
+  }
+
+  /* 2. Tugas Prioritas & Parkir Ide naik ke atas */
+  .dash-grid {
+    order: 2;
+  }
+
+  /* 3. Sesi Terbaru tepat di bawahnya */
+  .dash :deep(.dash-panel--wide) {
+    order: 3;
+  }
+
+  /* 4. Kartu Fokus, Antrean, Parkir Ide, BrainFall pindah ke paling bawah */
+  .dash-stats {
+    order: 4;
+    margin-top: 1rem; /* Jaga jarak dari panel Sesi Terbaru jika sebelumnya tidak ada gap */
+  }
+}
+</style>
