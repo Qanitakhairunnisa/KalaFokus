@@ -32,7 +32,6 @@
       <!-- Kanan: Stopwatch + Track Record -->
       <div class="focus-col">
         <div class="focus-card focus-timer">
-          <span class="dash-chip">🍅 Pomodoro · 25 menit</span>
 
           <div class="focus-ring">
             <svg viewBox="0 0 220 220" aria-hidden="true">
@@ -136,19 +135,30 @@ const { state, pendingTasks, focusMinutesToday, taskTitle } = useAppState()
 const inlineIdeaText = ref('')
 const inlineIdeaTag = ref('ide_kreatif')
 
+const elapsedSeconds = computed(() => {
+  if (typeof state.timer.elapsed === 'number') {
+    return Math.max(0, state.timer.elapsed)
+  }
+  const total = Number(state.timer.duration) || POMODORO_SECONDS
+  const rem = state.timer.remaining != null ? Number(state.timer.remaining) : total
+  return Math.max(0, total - rem)
+})
+
 const formattedTime = computed(() => {
-  const totalSec = Math.max(0, Number(state.timer.remaining) || 0)
-  const minutes = String(Math.floor(totalSec / 60)).padStart(2, '0')
+  const totalSec = elapsedSeconds.value
+  const hours = Math.floor(totalSec / 3600)
+  const minutes = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0')
   const seconds = String(totalSec % 60).padStart(2, '0')
-  return `${minutes}:${seconds}`
+  return hours > 0
+    ? `${String(hours).padStart(2, '0')}:${minutes}:${seconds}`
+    : `${minutes}:${seconds}`
 })
 
 // Lingkaran progres berputar penuh setiap 60 detik
 const dashOffset = computed(() => {
   const circumference = 603.18
-  const total = state.timer.duration || POMODORO_SECONDS
-  const progress = state.timer.remaining / total
-  return circumference * (1 - progress)
+  const secInMinute = elapsedSeconds.value % 60
+  return circumference * (1 - secInMinute / 60)
 })
 
 function handleInlineIdea() {
