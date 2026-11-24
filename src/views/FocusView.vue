@@ -29,12 +29,9 @@
         </div>
       </div>
 
-      <!-- Kanan: Timer + Track Record -->
+      <!-- Kanan: Stopwatch + Track Record -->
       <div class="focus-col">
         <div class="focus-card focus-timer">
-          <SegmentedControl v-model="state.timer.mode" variant="blue" button-class="timer-mode-btn" :options="timerModes"
-            @update:model-value="changeMode" />
-
           <div class="focus-ring">
             <svg viewBox="0 0 220 220" aria-hidden="true">
               <circle cx="110" cy="110" r="96" fill="none" stroke="#E8F1FB" stroke-width="9" />
@@ -57,9 +54,6 @@
           </select>
 
           <div class="focus-controls">
-            <button type="button" class="focus-ctl" aria-label="Reset" @click="resetTimer">
-              <BaseIcon name="rotate-ccw" />
-            </button>
             <button v-if="!state.timer.isRunning" type="button" class="dash-btn dash-btn--primary focus-main" @click="startTimer">
               <BaseIcon name="play" with-margin />Mulai
             </button>
@@ -115,7 +109,6 @@
 
 <script setup>
 import { ref, computed, reactive } from 'vue'
-import SegmentedControl from '../components/ui/SegmentedControl.vue'
 import BasePanel from '../components/ui/BasePanel.vue'
 import BaseIcon from '../components/ui/BaseIcon.vue'
 
@@ -125,9 +118,8 @@ const state = window.__kalafokus || reactive({
   sessions: [],
   timer: {
     isRunning: false,
-    mode: '25',
-    duration: 25 * 60,
-    remaining: 25 * 60,
+    elapsed: 0,
+    remaining: 0,
     distractions: 0,
     selectedTaskTitle: 'Sesi Fokus Mandiri',
     mood: 'calm',
@@ -136,11 +128,13 @@ const state = window.__kalafokus || reactive({
   }
 })
 
-const timerModes = [
-  { label: 'Pomodoro', value: '25' },
-  { label: 'Deep Work', value: '50' },
-  { label: 'Sprint', value: '15' }
-]
+// Inisialisasi stopwatch ke 0 jika state global sebelumnya masih memakai countdown default
+if (typeof state.timer.elapsed !== 'number') {
+  state.timer.elapsed = 0
+  if (!state.timer.isRunning) {
+    state.timer.remaining = 0
+  }
+}
 
 const inlineIdeaText = ref('')
 const inlineIdeaTag = ref('ide_kreatif')
@@ -152,36 +146,27 @@ const focusMinutesToday = computed(() =>
 )
 
 const formattedTime = computed(() => {
-  const s = Math.max(0, Number(state.timer.remaining) || 0)
-  const m = String(Math.floor(s / 60)).padStart(2, '0')
-  const sec = String(s % 60).padStart(2, '0')
-  return `${m}:${sec}`
+  const totalSec = Math.max(0, Number(state.timer.elapsed) || 0)
+  const h = Math.floor(totalSec / 3600)
+  const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0')
+  const s = String(totalSec % 60).padStart(2, '0')
+  return h > 0 ? `${String(h).padStart(2, '0')}:${m}:${s}` : `${m}:${s}`
 })
 
+// Lingkaran progres berputar penuh setiap 60 detik
 const dashOffset = computed(() => {
   const circumference = 603.18
-  const total = state.timer.duration || 1500
-  const progress = state.timer.remaining / total
-  return circumference * (1 - progress)
+  const secInMinute = (state.timer.elapsed || 0) % 60
+  return circumference * (1 - secInMinute / 60)
 })
-
-function changeMode(mins) {
-  pauseTimer()
-  state.timer.mode = String(mins)
-  state.timer.duration = Number(mins) * 60
-  state.timer.remaining = state.timer.duration
-}
 
 function startTimer() {
   if (state.timer.isRunning) return
   state.timer.isRunning = true
   clearInterval(state.timer.intervalId)
   state.timer.intervalId = setInterval(() => {
-    if (state.timer.remaining > 0) {
-      state.timer.remaining -= 1
-    } else {
-      completeSession()
-    }
+    state.timer.elapsed += 1
+    state.timer.remaining = state.timer.elapsed // Sinkronkan agar pill di header ikut naik
   }, 1000)
 }
 
@@ -190,14 +175,10 @@ function pauseTimer() {
   clearInterval(state.timer.intervalId)
 }
 
-function resetTimer() {
-  pauseTimer()
-  state.timer.remaining = state.timer.duration
-}
-
 function completeSession() {
+  if (!state.timer.elapsed) return
   pauseTimer()
-  const mins = Math.round(state.timer.duration / 60)
+  const mins = Math.max(1, Math.round(state.timer.elapsed / 60))
   state.sessions.unshift({
     id: Date.now(),
     time: new Date().toTimeString().slice(0, 5),
@@ -208,7 +189,8 @@ function completeSession() {
   })
   state.timer.distractions = 0
   state.timer.note = ''
-  resetTimer()
+  state.timer.elapsed = 0
+  state.timer.remaining = 0
 }
 
 function handleInlineIdea() {
