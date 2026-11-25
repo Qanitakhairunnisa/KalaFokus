@@ -27,11 +27,13 @@ function finish(completed) {
 
   const elapsed = completed ? t.duration : t.duration - t.remaining
   const minutes = Math.round(elapsed / 60)
+  const note = (t.note || '').trim()
   const task = appState.tasks.find((x) => x.id === t.selectedTaskId)
   const title = task?.title || 'Sesi Fokus Mandiri'
 
-  // Sesi < 1 menit tidak dicatat ke riwayat
-  if (minutes >= 1) {
+  // Sesi dicatat jika minimal 30 detik, atau kalau user menulis catatan sesi
+  const recorded = elapsed >= 30 || note.length > 0
+  if (recorded) {
     // Kalau selesai karena refresh setelah waktu habis, pakai waktu selesai yang sebenarnya
     const endedAt = completed && t.endsAt ? new Date(Math.min(t.endsAt, Date.now())) : new Date()
     appState.sessions.unshift({
@@ -43,11 +45,11 @@ function finish(completed) {
       duration: minutes,
       score: Math.max(70, 100 - (t.distractions || 0) * 5),
       mood: t.mood,
-      note: t.note
+      note
     })
   }
 
-  appState.lastSession = { completed, minutes, taskId: task?.id ?? null, taskTitle: title }
+  appState.lastSession = { completed, minutes, recorded, note, taskId: task?.id ?? null, taskTitle: title }
   resetTimer(t)
   appState.isNextTaskModalOpen = true
 }

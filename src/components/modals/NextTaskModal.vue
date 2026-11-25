@@ -10,11 +10,14 @@
           {{ last.completed ? 'Pomodoro Selesai!' : 'Sesi Dihentikan' }}
         </h3>
         <p class="text-sm text-mocha-600 mt-1.5">
-          <template v-if="last.minutes >= 1">
-            Kamu fokus <strong>{{ last.minutes }} menit</strong>
+          <template v-if="last.recorded ?? last.minutes >= 1">
+            Kamu fokus <strong>{{ last.minutes >= 1 ? `${last.minutes} menit` : 'kurang dari 1 menit' }}</strong>
             <template v-if="last.taskId"> pada "{{ taskTitle(last.taskId, last.taskTitle) }}"</template>.
           </template>
-          <template v-else>Sesi kurang dari 1 menit, jadi tidak dicatat.</template>
+          <template v-else>Sesi kurang dari 30 detik tanpa catatan, jadi tidak dicatat.</template>
+        </p>
+        <p v-if="last.note" class="mt-3 p-3 rounded-xl bg-warmcream-100 border border-warmcream-300 text-xs text-mocha-800 text-left whitespace-pre-wrap">
+          <strong>Catatan tersimpan:</strong> {{ last.note }}
         </p>
       </div>
 

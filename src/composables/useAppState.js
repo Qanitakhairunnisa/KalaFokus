@@ -156,6 +156,23 @@ const ideasToday = computed(() => appState.ideas.filter(isToday))
 const taskTitle = (taskId, fallback = 'Sesi Fokus Mandiri') =>
   appState.tasks.find((t) => t.id === taskId)?.title || fallback
 
+/** Status tugas dari sebuah sesi: 'done' | 'pending' | 'none' (tanpa tugas) | 'deleted' */
+const sessionTaskStatus = (session) => {
+  if (!session?.taskId) return 'none'
+  const task = appState.tasks.find((t) => t.id === session.taskId)
+  if (!task) return 'deleted'
+  return task.completed ? 'done' : 'pending'
+}
+
+export const TASK_STATUS_LABEL = {
+  done: 'Selesai',
+  pending: 'Belum selesai',
+  none: 'Tanpa tugas',
+  deleted: 'Tugas dihapus'
+}
+
+export const formatMinutes = (m) => (Number(m) >= 1 ? `${m} mnt` : '<1 mnt')
+
 export function useAppState() {
   return {
     state: appState,
@@ -163,6 +180,7 @@ export function useAppState() {
     focusMinutesToday,
     brainfallMinutesToday,
     ideasToday,
-    taskTitle
+    taskTitle,
+    sessionTaskStatus
   }
 }

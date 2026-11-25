@@ -7,6 +7,7 @@ import FocusView from '../views/FocusView.vue'
 import TasksView from '../views/TasksView.vue'
 import BrainfallView from '../views/BrainfallView.vue'
 import AiInsightView from '../views/AiInsightView.vue'
+import AiChatView from '../views/AiChatView.vue'
 import AuthView from '../views/AuthView.vue'
 import ProfileView from '../views/ProfileView.vue'
 
@@ -46,6 +47,12 @@ const routes = [
     name: 'ai-insight',
     component: AiInsightView,
     meta: { title: 'AI Insight', viewKey: 'ai-insight', requiresAuth: true }
+  },
+  {
+    path: '/ai-insight/chat/:id',
+    name: 'ai-chat',
+    component: AiChatView,
+    meta: { title: 'Chat AI Insight', viewKey: 'ai-insight', requiresAuth: true }
   },
   {
     path: '/profile',

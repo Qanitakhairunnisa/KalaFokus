@@ -5,6 +5,7 @@ import { useAuth } from '../../composables/useAuth'
 import { useFocusTimer } from '../../composables/useFocusTimer'
 
 const route = useRoute()
+const isActive = (path) => route.path === path || (path !== '/' && route.path.startsWith(path + '/'))
 const router = useRouter()
 const { logout: authLogout } = useAuth()
 const { cancel: cancelTimer } = useFocusTimer()
@@ -56,7 +57,7 @@ async function handleLogout() {
       <nav class="space-y-1.5">
         <RouterLink v-for="item in navItems" :key="item.path" :to="item.path"
           class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
-          :class="route.path === item.path
+          :class="isActive(item.path)
             ? 'bg-mocha-700 text-softwhite shadow-sm'
             : 'text-warmcream-200/70 hover:bg-mocha-800 hover:text-softwhite'">
           <span>{{ item.name }}</span>

@@ -72,8 +72,13 @@
               <option value="tired">Lelah</option>
               <option value="overwhelmed">Kewalahan</option>
             </select>
-            <input v-model="state.timer.note" type="text" class="task-input" placeholder="Catatan sesi" />
           </div>
+          <label class="focus-note">
+            <span>Catatan sesi — apa saja yang sudah kamu kerjakan?</span>
+            <textarea v-model="state.timer.note" rows="3" maxlength="1000" class="task-input"
+              placeholder="Contoh: Selesai bab 2, tinggal revisi daftar pustaka" ></textarea>
+            <small v-if="state.timer.isRunning">Tulis catatan dulu sebelum menekan Berhenti untuk istirahat.</small>
+          </label>
         </div>
       </div>
     </div>
@@ -91,14 +96,25 @@
               <th>Tugas</th>
               <th>Durasi</th>
               <th>Skor</th>
+              <th>Status Tugas</th>
+              <th>Catatan Terakhir</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="s in state.sessions.slice(0, 20)" :key="s.id">
               <td>{{ formatWhen(s) }}</td>
               <td class="dash-cell-title">{{ taskTitle(s.taskId, s.taskTitle) }}</td>
-              <td>{{ s.duration }} mnt</td>
+              <td>{{ formatMinutes(s.duration) }}</td>
               <td>{{ s.score }}%</td>
+              <td>
+                <span class="session-status" :class="`session-status--${sessionTaskStatus(s)}`">
+                  {{ TASK_STATUS_LABEL[sessionTaskStatus(s)] }}
+                </span>
+              </td>
+              <td class="session-note" :title="s.note">{{ s.note || '—' }}</td>
+            </tr>
+            <tr v-if="state.sessions.length === 0">
+              <td colspan="6" class="text-center py-4 text-xs opacity-60">Belum ada riwayat sesi.</td>
             </tr>
           </tbody>
         </table>
@@ -116,6 +132,43 @@
 .focus-stop:hover {
   background: #b23a49;
 }
+.focus-note {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  margin-top: 0.75rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.focus-note textarea {
+  resize: vertical;
+  min-height: 4.5rem;
+  font-weight: 400;
+}
+.focus-note small {
+  font-weight: 400;
+  opacity: 0.7;
+}
+.session-status {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #f1ece4;
+  color: #6b5a4a;
+}
+.session-status--done { background: #e3efe3; color: #3f6b46; }
+.session-status--pending { background: #fbeee0; color: #a2622a; }
+.session-note {
+  max-width: 260px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.75rem;
+}
 .focus-pill:disabled {
   opacity: 0.7;
   cursor: not-allowed;
@@ -127,10 +180,10 @@ import { ref, computed } from 'vue'
 import BasePanel from '../components/ui/BasePanel.vue'
 import BaseIcon from '../components/ui/BaseIcon.vue'
 import { POMODORO_SECONDS, useFocusTimer } from '../composables/useFocusTimer'
-import { formatWhen, nowTime, toDateKey, useAppState } from '../composables/useAppState'
+import { TASK_STATUS_LABEL, formatMinutes, formatWhen, nowTime, toDateKey, useAppState } from '../composables/useAppState'
 
 const { start, stop } = useFocusTimer()
-const { state, pendingTasks, focusMinutesToday, taskTitle } = useAppState()
+const { state, pendingTasks, focusMinutesToday, taskTitle, sessionTaskStatus } = useAppState()
 
 const inlineIdeaText = ref('')
 const inlineIdeaTag = ref('ide_kreatif')

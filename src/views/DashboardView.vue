@@ -84,16 +84,24 @@
               <th>Tugas</th>
               <th>Durasi</th>
               <th>Skor</th>
+              <th>Status Tugas</th>
+              <th>Catatan Terakhir</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="session in sessionsToday" :key="session.id">
               <td class="dash-cell-title">{{ taskTitle(session.taskId, session.taskTitle) }}</td>
-              <td>{{ session.duration }} mnt</td>
+              <td>{{ formatMinutes(session.duration) }}</td>
               <td>{{ session.score }}%</td>
+              <td>
+                <span class="session-status" :class="`session-status--${sessionTaskStatus(session)}`">
+                  {{ TASK_STATUS_LABEL[sessionTaskStatus(session)] }}
+                </span>
+              </td>
+              <td class="session-note" :title="session.note">{{ session.note || '—' }}</td>
             </tr>
             <tr v-if="sessionsToday.length === 0">
-              <td colspan="3" class="text-center py-4 text-xs opacity-60">
+              <td colspan="5" class="text-center py-4 text-xs opacity-60">
                 Belum ada riwayat sesi fokus hari ini.
               </td>
             </tr>
@@ -108,13 +116,13 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
-import { formatDeadline, isToday, useAppState } from '../composables/useAppState'
+import { TASK_STATUS_LABEL, formatDeadline, formatMinutes, isToday, useAppState } from '../composables/useAppState'
 import StatCard from '../components/ui/StatCard.vue'
 import BasePanel from '../components/ui/BasePanel.vue'
 
 const router = useRouter()
 const { state: authState } = useAuth()
-const { state, pendingTasks, focusMinutesToday, brainfallMinutesToday, taskTitle } = useAppState()
+const { state, pendingTasks, focusMinutesToday, brainfallMinutesToday, taskTitle, sessionTaskStatus } = useAppState()
 
 const firstName = computed(() => {
   const full = authState.user?.displayName || authState.user?.email?.split('@')[0] || 'Teman'
@@ -139,6 +147,24 @@ function startFocusOnTask(task) {
 </script>
 
 <style scoped>
+.session-status {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #f1ece4;
+  color: #6b5a4a;
+}
+.session-status--done { background: #e3efe3; color: #3f6b46; }
+.session-status--pending { background: #fbeee0; color: #a2622a; }
+.session-note {
+  max-width: 260px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.75rem;
+}
 @media (max-width: 768px) {
   .dash {
     display: flex;
